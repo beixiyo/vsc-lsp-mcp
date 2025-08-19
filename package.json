@@ -19,7 +19,8 @@
   "files": [
     "LICENSE.md",
     "dist/*",
-    "res/*"
+    "res/*",
+    "CHANGELOG.md"
   ],
   "engines": {
     "vscode": "^1.97.0"
