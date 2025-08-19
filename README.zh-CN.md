@@ -1,4 +1,4 @@
-# VSCode LSP MCP 🚀
+# VSCode LSP MCP
 
 <p align="center">
   <img src="res/icon.webp" width="128" height="128" alt="LSP MCP Icon">
