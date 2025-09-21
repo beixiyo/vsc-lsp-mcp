@@ -55,15 +55,11 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch --sourcemap",
-    "prepare": "nr update",
-    "update": "vscode-ext-gen --output src/generated/meta.ts",
-    "lint": "eslint .",
-    "vscode:prepublish": "nr build",
+    "lint": "eslint src --fix",
+    "vscode:prepublish": "pnpm build",
     "publish": "vsce publish --no-dependencies",
     "vsix": "vsce package --no-dependencies",
-    "test": "vitest",
-    "typecheck": "tsc --noEmit",
-    "release": "bumpp && nr publish"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.15.0",
@@ -72,20 +68,13 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.2.1",
-    "@antfu/ni": "^23.3.1",
     "@types/express": "^5.0.3",
     "@types/node": "^22.13.4",
     "@types/vscode": "^1.97.0",
     "@vscode/vsce": "^3.2.2",
-    "bumpp": "^10.0.3",
     "tsup": "^8.5.0",
     "eslint": "^9.20.1",
-    "esno": "^4.8.0",
-    "pnpm": "^10.4.1",
     "reactive-vscode": "^0.2.10",
-    "typescript": "^5.7.3",
-    "vite": "^6.1.0",
-    "vitest": "^3.0.5",
-    "vscode-ext-gen": "^1.0.0"
+    "typescript": "^5.7.3"
   }
 }

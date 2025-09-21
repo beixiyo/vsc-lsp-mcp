@@ -1,5 +1,5 @@
 import * as vscode from 'vscode'
-import { logger } from '../utils'
+import { logger } from '../utils/logger'
 
 /**
  * 根据URI获取文档对象
