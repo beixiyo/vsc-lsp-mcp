@@ -51,11 +51,14 @@ This extension bridges that gap, providing AI tools with the same code intellige
 
 <!-- configs -->
 
-| Key                  | Description                                                              | Type      | Default |
-| -------------------- | ------------------------------------------------------------------------ | --------- | ------- |
-| `lsp-mcp.enabled`    | Enable or disable the LSP MCP server.                                    | `boolean` | `true`  |
-| `lsp-mcp.port`       | Port for the LSP MCP server.                                             | `number`  | `9527`  |
-| `lsp-mcp.maxRetries` | Maximum number of port retry attempts when the default port is occupied. | `number`  | `10`    |
+| Key                           | Description                                                                                                                                           | Type      | Default |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------- |
+| `lsp-mcp.enabled`             | Enable or disable the LSP MCP server.                                                                                                                 | `boolean` | `true`  |
+| `lsp-mcp.port`                | Port for the LSP MCP server.                                                                                                                          | `number`  | `9527`  |
+| `lsp-mcp.maxRetries`          | Maximum number of port retry attempts when the default port is occupied.                                                                              | `number`  | `10`    |
+| `lsp-mcp.cors.enabled`        | Enable or disable CORS (Cross-Origin Resource Sharing).                                                                                               | `boolean` | `true`  |
+| `lsp-mcp.cors.allowOrigins`   | Allowed origins for CORS. Use `*` to allow all origins, or provide a comma-separated list of origins (e.g., `http://localhost:3000,http://localhost:5173`). | `string`  | `*`     |
+| `lsp-mcp.cors.withCredentials` | Whether to allow credentials (cookies, authorization headers) in CORS requests.                                                                       | `boolean` | `false` |
 
 <!-- configs -->
 

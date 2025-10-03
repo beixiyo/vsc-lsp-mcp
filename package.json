@@ -1,7 +1,7 @@
 {
   "name": "lsp-mcp",
   "displayName": "LSP MCP",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "LSP MCP Server for VSCode",
   "publisher": "CJL",
   "author": "CJL <2662442385@qq.com>",
@@ -48,6 +48,21 @@
           "type": "number",
           "default": 10,
           "description": "Maximum number of port retry attempts when the default port is occupied."
+        },
+        "lsp-mcp.cors.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable CORS (Cross-Origin Resource Sharing)."
+        },
+        "lsp-mcp.cors.allowOrigins": {
+          "type": "string",
+          "default": "*",
+          "description": "Allowed origins for CORS. Use '*' to allow all origins, or provide a comma-separated list of origins (e.g., 'http://localhost:3000,http://localhost:5173')."
+        },
+        "lsp-mcp.cors.withCredentials": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to allow credentials (cookies, authorization headers) in CORS requests."
         }
       }
     }

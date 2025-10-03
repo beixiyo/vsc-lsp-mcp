@@ -4,6 +4,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js'
 import express from 'express'
 import { window, workspace } from 'vscode'
+import { cors } from './cors'
 import { addLspTools } from './tools'
 
 /** 存储传输对象的映射 */
@@ -15,11 +16,26 @@ export function startMcp() {
   const mcpPort = config.get('port', 9527)
   const maxRetries = config.get('maxRetries', 10)
 
+  // CORS 配置
+  const corsEnabled = config.get('cors.enabled', true)
+  const allowOriginsStr: string = config.get('cors.allowOrigins', '*')
+  const withCredentials = config.get('cors.withCredentials', false)
+
   if (!isMcpEnabled) {
     window.showInformationMessage('LSP MCP server is disabled by configuration.')
     return
   }
   const app = express()
+
+  // 应用 CORS 中间件（必须在其他中间件之前）
+  if (corsEnabled) {
+    const allowOrigins = allowOriginsStr === '*'
+      ? '*'
+      : allowOriginsStr.split(',').map(origin => origin.trim())
+
+    app.use(cors(allowOrigins, withCredentials))
+  }
+
   app.use(express.json())
 
   // Handle POST requests for client-to-server communication
