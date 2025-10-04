@@ -1,7 +1,7 @@
 {
   "name": "lsp-mcp",
   "displayName": "LSP MCP",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "LSP MCP Server for VSCode",
   "publisher": "CJL",
   "author": "CJL <2662442385@qq.com>",
@@ -61,8 +61,13 @@
         },
         "lsp-mcp.cors.withCredentials": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Whether to allow credentials (cookies, authorization headers) in CORS requests."
+        },
+        "lsp-mcp.cors.exposeHeaders": {
+          "type": "string",
+          "default": "Mcp-Session-Id",
+          "description": "Headers that browsers are allowed to access. Provide a comma-separated list of headers (e.g., 'Mcp-Session-Id,Content-Type')."
         }
       }
     }

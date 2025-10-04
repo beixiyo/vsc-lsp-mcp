@@ -1,14 +1,15 @@
-
 import type { NextFunction, Request, Response } from 'express'
 
 /**
  * CORS 中间件
  * @param allowOrigins - 允许的源列表，或者 '*' 表示所有源
  * @param withCredentials - 是否允许携带凭证（cookie）
+ * @param exposeHeaders - 允许浏览器访问的响应头列表
  */
 export function cors(
   allowOrigins: string[] | '*' = '*',
-  withCredentials: boolean = true
+  withCredentials: boolean = true,
+  exposeHeaders: string[] = ['Mcp-Session-Id'],
 ) {
   return (req: Request, res: Response, next: NextFunction) => {
     const origin = req.headers.origin
@@ -35,15 +36,20 @@ export function cors(
       res.header('Access-Control-Allow-Credentials', 'true')
     }
 
+    /** 暴露响应头给浏览器 */
+    if (exposeHeaders.length > 0) {
+      res.header('Access-Control-Expose-Headers', exposeHeaders.join(','))
+    }
+
     /** 预检请求 */
     if (req.method === 'OPTIONS') {
       res.header(
         'Access-Control-Allow-Methods',
-        req.headers['access-control-request-method'] || 'GET,POST,PUT,DELETE,OPTIONS'
+        req.headers['access-control-request-method'] || 'GET,POST,PUT,DELETE,OPTIONS',
       )
       res.header(
         'Access-Control-Allow-Headers',
-        req.headers['access-control-request-headers'] || 'Content-Type,Authorization,mcp-session-id'
+        req.headers['access-control-request-headers'] || 'Content-Type,Authorization,mcp-session-id',
       )
       /** 缓存预检结果 24 小时 */
       res.header('Access-Control-Max-Age', '86400')
