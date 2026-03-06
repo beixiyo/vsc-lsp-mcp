@@ -20,6 +20,10 @@ VSCode LSP MCP is a Visual Studio Code extension that exposes Language Server Pr
 ![vscode-ext](./docAssets/vsc-ext.webp)
 ![demo](./docAssets/demo.webp)
 
+<a href="https://glama.ai/mcp/servers/@beixiyo/vsc-lsp-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@beixiyo/vsc-lsp-mcp/badge" alt="VSCode LSP Server MCP server" />
+</a>
+
 ### 🌟 Why This Extension?
 
 Large language models like Claude and Cursor struggle to understand your codebase accurately because:
