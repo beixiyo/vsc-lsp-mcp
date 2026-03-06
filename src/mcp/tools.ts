@@ -1,6 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 import {
+  getClassFileContents,
   getCompletions,
   getDefinition,
   getHover,
@@ -79,6 +80,21 @@ export function addLspTools(server: McpServer) {
     async ({ uri, line, character }) => {
       const result = await getReferences(uri, line, character)
       return { content: [{ type: 'text', text: JSON.stringify(result) }] }
+    },
+  )
+
+  server.registerTool(
+    'get_class_file_contents',
+    {
+      title: 'Get Class File Contents',
+      description: 'Get decompiled source code of a Java class file via jdt:// URI. Use this to retrieve the source of library/dependency classes that jdtls references. The jdt:// URI is typically obtained from definition or hover results.',
+      inputSchema: {
+        uri: z.string().describe('The jdt:// URI of the class file. Typically obtained from go-to-definition results pointing to dependency classes.'),
+      },
+    },
+    async ({ uri }) => {
+      const result = await getClassFileContents(uri)
+      return { content: [{ type: 'text', text: result }] }
     },
   )
 

@@ -1,3 +1,4 @@
+export * from './classFileContents'
 export * from './completion'
 export * from './definition'
 export * from './hover'
