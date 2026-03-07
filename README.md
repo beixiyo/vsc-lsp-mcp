@@ -40,6 +40,7 @@ This extension bridges that gap, providing AI tools with the same code intellige
 - 🔄 **LSP Bridge**: Converts LSP features into MCP tools
 - 🔌 **Multi-Instance Support**: Automatically handles port conflicts for multiple VSCode windows
 - 🧠 **Rich Code Context**: Provides accurate symbol information through LSP
+- ☕ **Java dependency source**: Get decompiled Java class source via jdt:// URI (from jdtls), so AI can read library implementations
 
 ## 🛠️ Exposed MCP Tools
 
@@ -49,6 +50,7 @@ This extension bridges that gap, providing AI tools with the same code intellige
 | `get_definition` | Find symbol definitions |
 | `get_completions` | Get intelligent code completions |
 | `get_references` | Find all references to a symbol |
+| `get_class_file_contents` | Get decompiled Java class source via jdt:// URI (e.g. from `get_definition` when the target is in a dependency JAR) |
 | `rename_symbol` | Rename symbols across files |
 
 ## 📋 Configuration
@@ -71,13 +73,61 @@ This extension bridges that gap, providing AI tools with the same code intellige
 
 ### Cursor
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.png)](https://cursor.com/install-mcp?name=lsp&config=JTdCJTIydXJsJTIyJTNBJTIyaHR0cCUzQSUyRiUyRjEyNy4wLjAuMSUzQTk1MjclMkZtY3AlMjIlN0Q%3D)
+Config file: `~/.cursor/mcp.json` (e.g. `%USERPROFILE%\.cursor\mcp.json` on Windows)
 
 ```json
 {
   "mcpServers": {
     "lsp": {
       "url": "http://127.0.0.1:9527/mcp"
+    }
+  }
+}
+```
+
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.png)](https://cursor.com/install-mcp?name=lsp&config=JTdCJTIydXJsJTIyJTNBJTIyaHR0cCUzQSUyRiUyRjEyNy4wLjAuMSUzQTk1MjclMkZtY3AlMjIlN0Q%3D)
+
+### OpenCode
+
+Config file: `~/.config/opencode/opencode.jsonc`
+
+```json
+{
+  "mcp": {
+    "lsp-mcp": {
+      "type": "remote",
+      "url": "http://127.0.0.1:9527/mcp",
+      "enabled": true
+    }
+  }
+}
+```
+
+### Claude Code
+
+Config file: `~/.claude.json`
+
+```json
+{
+  "mcpServers": {
+    "lsp-mcp": {
+      "type": "http",
+      "url": "http://127.0.0.1:9527/mcp"
+    }
+  }
+}
+```
+
+### Gemini | IFlow
+
+Config file: `~/.gemini/settings.json`
+
+```json
+{
+  "mcpServers": {
+    "lsp-mcp": {
+      "type": "streamable-http",
+      "httpUrl": "http://127.0.0.1:9527/mcp"
     }
   }
 }

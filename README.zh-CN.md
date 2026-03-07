@@ -20,6 +20,10 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展，它通过模型上下文协
 ![vscode-ext](./docAssets/vsc-ext.webp)
 ![demo](./docAssets/demo.webp)
 
+<a href="https://glama.ai/mcp/servers/@beixiyo/vsc-lsp-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@beixiyo/vsc-lsp-mcp/badge" alt="VSCode LSP Server MCP server" />
+</a>
+
 ### 🌟 为什么需要这个扩展？
 
 像 Claude 和 Cursor 这样的大型语言模型难以准确理解你的代码库，因为：
@@ -36,6 +40,7 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展，它通过模型上下文协
 - 🔄 **LSP 桥接**：将 LSP 功能转换为 MCP 工具
 - 🔌 **多实例支持**：自动处理多个 VSCode 窗口的端口冲突
 - 🧠 **丰富的代码上下文**：通过 LSP 提供准确的符号信息
+- ☕ **Java 依赖源码**：通过 `jdt://` URI 获取 jdtls 反编译的类源码，便于 AI 阅读依赖库实现
 
 ## 🛠️ 暴露的 MCP 工具
 
@@ -45,6 +50,7 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展，它通过模型上下文协
 | `get_definition` | 查找符号定义 |
 | `get_completions` | 获取智能代码补全 |
 | `get_references` | 查找符号的所有引用 |
+| `get_class_file_contents` | 通过 jdt:// URI 获取反编译的 Java 类源码（如 `get_definition` 指向依赖 JAR 时返回的 URI） |
 | `rename_symbol` | 跨文件重命名符号 |
 
 ## 📋 配置
@@ -67,13 +73,61 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展，它通过模型上下文协
 
 ### Cursor
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.png)](https://cursor.com/install-mcp?name=lsp&config=JTdCJTIydXJsJTIyJTNBJTIyaHR0cCUzQSUyRiUyRjEyNy4wLjAuMSUzQTk1MjclMkZtY3AlMjIlN0Q%3D)
+配置文件：`~/.cursor/mcp.json`（Windows 如 `%USERPROFILE%\.cursor\mcp.json`）
 
 ```json
 {
   "mcpServers": {
     "lsp": {
       "url": "http://127.0.0.1:9527/mcp"
+    }
+  }
+}
+```
+
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.png)](https://cursor.com/install-mcp?name=lsp&config=JTdCJTIydXJsJTIyJTNBJTIyaHR0cCUzQSUyRiUyRjEyNy4wLjAuMSUzQTk1MjclMkZtY3AlMjIlN0Q%3D)
+
+### OpenCode
+
+配置文件：`~/.config/opencode/opencode.jsonc`
+
+```json
+{
+  "mcp": {
+    "lsp-mcp": {
+      "type": "remote",
+      "url": "http://127.0.0.1:9527/mcp",
+      "enabled": true
+    }
+  }
+}
+```
+
+### Claude Code
+
+配置文件：`~/.claude.json`
+
+```json
+{
+  "mcpServers": {
+    "lsp-mcp": {
+      "type": "http",
+      "url": "http://127.0.0.1:9527/mcp"
+    }
+  }
+}
+```
+
+### Gemini | IFlow
+
+配置文件：`~/.gemini/settings.json`
+
+```json
+{
+  "mcpServers": {
+    "lsp-mcp": {
+      "type": "streamable-http",
+      "httpUrl": "http://127.0.0.1:9527/mcp"
     }
   }
 }

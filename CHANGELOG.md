@@ -17,3 +17,9 @@
   - 新增 `lsp-mcp.cors.exposeHeaders` 配置项，默认值为 `Mcp-Session-Id`
   - 支持逗号分隔的多个响应头配置
   - 允许浏览器访问指定的响应头，便于客户端获取会话信息
+
+## [0.0.6] - 2026-03-07
+### 新增
+- 新增 `get_class_file_contents` MCP 工具
+  - 通过 jdt:// URI 获取 jdtls 反编译的 Java 类源码
+  - 典型用法：`get_definition` 返回依赖库中的 jdt:// URI 时，可调用本工具获取该类的反编译源码，便于 AI 阅读依赖实现
