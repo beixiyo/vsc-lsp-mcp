@@ -15,7 +15,11 @@
 
 ## 🔍 Overview
 
-VSCode LSP MCP is a Visual Studio Code extension that exposes Language Server Protocol (LSP) features through the Model Context Protocol (MCP). This allows AI assistants and external tools to utilize VSCode's powerful language intelligence capabilities without direct integration.
+VSCode LSP MCP is a Visual Studio Code extension that exposes Language Server Protocol (LSP) features through the Model Context Protocol (MCP).
+
+**Extension ID**: `cjl.lsp-mcp` — open Extensions (`Ctrl+Shift+X` / `Cmd+Shift+X`) and search for **cjl.lsp-mcp** to find this plugin precisely.
+
+This allows AI assistants and external tools to utilize VSCode's powerful language intelligence capabilities without direct integration.
 
 ![vscode-ext](./docAssets/vsc-ext.webp)
 ![demo](./docAssets/demo.webp)

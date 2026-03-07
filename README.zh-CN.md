@@ -15,7 +15,11 @@
 
 ## 🔍 概述
 
-VSCode LSP MCP 是一个 Visual Studio Code 扩展，它通过模型上下文协议（MCP）暴露了语言服务器协议（LSP）功能。这使得 AI 助手和外部工具无需直接集成即可利用 VSCode 强大的语言智能功能。
+VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mcp`
+
+在 VS Code 中打开扩展视图（`Ctrl+Shift+X` / `Cmd+Shift+X`），搜索 **cjl.lsp-mcp** 可精确找到本插件
+
+它通过模型上下文协议（MCP）暴露了语言服务器协议（LSP）功能。这使得 AI 助手和外部工具无需直接集成即可利用 VSCode 强大的语言智能功能
 
 ![vscode-ext](./docAssets/vsc-ext.webp)
 ![demo](./docAssets/demo.webp)
