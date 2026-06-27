@@ -1,3 +1,12 @@
+## [0.2.1] - 2026-06-27
+
+### Fixed
+- 修复 VS Code Marketplace 不解析顶层 `displayName` / `description` nls 占位符导致展示 `%lsp-mcp.displayName%` 的问题
+
+### Changed
+- 新增 `release:*` 发布脚本，统一先生成 `lsp-mcp.vsix`，再发布到 VS Code Marketplace 和 Open VSX
+- 新增 `PUBLISHING.md`，记录 token 配置、发布前检查和双市场发布流程
+
 ## [0.2.0] - 2026-06-27
 
 ### Added

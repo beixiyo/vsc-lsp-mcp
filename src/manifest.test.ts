@@ -8,6 +8,8 @@ describe('extension manifest', () => {
   it('declares the VS Code MCP server provider', () => {
     const pkg = readJson('package.json')
 
+    expect(pkg.displayName).toBe('LSP MCP')
+    expect(pkg.description).toBe('LSP MCP Server for VS Code')
     expect(pkg.engines.vscode).toBe('^1.101.0')
     expect(pkg.devDependencies['@types/vscode']).toBe('1.101.0')
     expect(pkg.contributes.mcpServerDefinitionProviders).toEqual([

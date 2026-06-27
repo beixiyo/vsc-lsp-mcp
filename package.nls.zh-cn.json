@@ -1,6 +1,4 @@
 {
-  "lsp-mcp.displayName": "LSP MCP",
-  "lsp-mcp.description": "用于 VSCode 的 LSP MCP 服务器",
   "lsp-mcp.mcpServerDefinitionProvider.localServer.label": "LSP MCP 服务器",
   "lsp-mcp.configuration.title": "LSP MCP 服务器配置",
   "lsp-mcp.configuration.enabled.description": "启用或禁用 LSP MCP 服务器。",

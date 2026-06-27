@@ -32,6 +32,7 @@
 ## VS Code 扩展注意事项
 
 - `package.json` 中面向用户的贡献项文本使用 `%key%`，对应文案写入 `package.nls.json` 与 `package.nls.<locale>.json`
+- 顶层 `displayName` / `description` 是 Marketplace 展示与搜索字段，保持英文 literal，不要写成 `%key%`
 - 运行时代码里的用户可见提示使用 `vscode.l10n.t`，对应非默认语言资源写入 `l10n/bundle.l10n.<locale>.json`
 - 英文是默认 fallback：manifest 的英文 fallback 在 `package.nls.json`，运行时代码的英文 fallback 在源码字符串里
 - 不要在扩展主进程里引入 `@vscode/l10n`，VS Code 会为扩展主进程加载本地化资源

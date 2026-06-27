@@ -1,6 +1,4 @@
 {
-  "lsp-mcp.displayName": "LSP MCP",
-  "lsp-mcp.description": "LSP MCP Server for VSCode",
   "lsp-mcp.mcpServerDefinitionProvider.localServer.label": "LSP MCP Server",
   "lsp-mcp.configuration.title": "LSP MCP Server Configuration",
   "lsp-mcp.configuration.enabled.description": "Enable or disable the LSP MCP server.",
