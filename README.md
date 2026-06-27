@@ -121,7 +121,7 @@ Config file: `~/.cursor/mcp.json` (e.g. `%USERPROFILE%\.cursor\mcp.json` on Wind
 ```json
 {
   "mcpServers": {
-    "lsp": {
+    "lsp-mcp": {
       "url": "http://127.0.0.1:9527/mcp"
     }
   }
@@ -188,7 +188,7 @@ url = "http://127.0.0.1:9527/mcp"
 ```json
 {
   "mcpServers": {
-    "lsp": {
+    "lsp-mcp": {
       "type": "streamable-http",
       "url": "http://127.0.0.1:9527/mcp",
       "disabled": false
