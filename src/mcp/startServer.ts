@@ -7,7 +7,12 @@ import { l10n, window } from 'vscode'
  * @param initialPort - 初始端口
  * @param maxRetries - 最大重试次数
  */
-export function startServer(app: express.Express, initialPort: number, maxRetries: number) {
+export function startServer(
+  app: express.Express,
+  initialPort: number,
+  maxRetries: number,
+  options: StartServerOptions = {},
+) {
   let currentPort = initialPort
   let retries = 0
   let hasShownPortConflict = false
@@ -20,6 +25,8 @@ export function startServer(app: express.Express, initialPort: number, maxRetrie
       }
 
       // 如果之前显示过端口冲突提示，则显示最终成功启动的消息
+      options.onStarted?.(currentPort)
+
       if (hasShownPortConflict) {
         window.showInformationMessage(l10n.t(
           'LSP MCP server started on port {port} (original port {originalPort} was occupied).',
@@ -53,4 +60,14 @@ export function startServer(app: express.Express, initialPort: number, maxRetrie
   }
 
   tryListen()
+}
+
+/**
+ * Server startup callbacks.
+ */
+export interface StartServerOptions {
+  /**
+   * Called after the HTTP server starts on the actual listening port.
+   */
+  onStarted?: (port: number) => void
 }

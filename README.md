@@ -54,6 +54,7 @@ This extension bridges that gap, providing AI tools with the same code intellige
 ## ⚙️ Features
 
 - 🔄 **LSP Bridge**: Converts LSP features into MCP tools
+- 🤖 **VS Code Copilot integration**: Registers the local MCP server directly with VS Code Chat / Copilot
 - 🔌 **Multi-Instance Support**: Automatically handles port conflicts for multiple VSCode windows
 - 🧠 **16 LSP operations** covering navigation (definition, declaration, implementation, references), documentation (hover, completions), structure (document/workspace symbols, call hierarchy), and manipulation (rename)
 - ☕ **Java dependency source**: Get decompiled Java class source via jdt:// URI (from jdtls), so AI can read library implementations
@@ -106,6 +107,12 @@ All operations are invoked through the single `execute_lsp` MCP tool with a unif
 <!-- configs -->
 
 ## 🔗 Integration with AI Tools
+
+### VS Code Copilot
+
+No `mcp.json` setup is required. After the extension starts, it registers the local LSP MCP server with VS Code through an MCP server definition provider.
+
+Use **MCP: List Servers** or the chat tools picker in VS Code to enable or manage the **LSP MCP Server**.
 
 ### Cursor
 

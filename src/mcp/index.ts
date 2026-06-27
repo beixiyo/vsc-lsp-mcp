@@ -1,3 +1,4 @@
+import type { ExtensionContext } from 'vscode'
 import { randomUUID } from 'node:crypto'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
@@ -6,11 +7,15 @@ import express from 'express'
 import { l10n, window, workspace } from 'vscode'
 import { transports } from './config'
 import { cors } from './cors'
+import { registerMcpServerProvider } from './provider'
 import { handleSessionRequest } from './session'
 import { startServer } from './startServer'
 import { addLspTools } from './tools'
 
-export function startMcp() {
+export function startMcp(context: ExtensionContext) {
+  let activePort: number | undefined
+  const mcpProvider = registerMcpServerProvider(context, () => activePort)
+
   const config = workspace.getConfiguration('lsp-mcp')
   const isMcpEnabled = config.get('enabled', true)
   const mcpPort = config.get('port', 9527)
@@ -23,6 +28,7 @@ export function startMcp() {
   const exposeHeadersStr: string = config.get('cors.exposeHeaders', 'Mcp-Session-Id')
 
   if (!isMcpEnabled) {
+    mcpProvider.refresh()
     window.showInformationMessage(l10n.t('LSP MCP server is disabled by configuration.'))
     return
   }
@@ -101,5 +107,10 @@ export function startMcp() {
   app.get('/mcp', handleSessionRequest)
 
   // 尝试启动服务器，处理端口冲突
-  startServer(app, mcpPort, maxRetries)
+  startServer(app, mcpPort, maxRetries, {
+    onStarted(port) {
+      activePort = port
+      mcpProvider.refresh()
+    },
+  })
 }

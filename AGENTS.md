@@ -1,7 +1,7 @@
 ## 项目结构
 
 - `src/index.ts`：VS Code 扩展入口，激活后启动 MCP 服务
-- `src/mcp/`：MCP 服务相关逻辑，包括 HTTP transport、session、CORS、端口启动与工具注册
+- `src/mcp/`：MCP 服务相关逻辑，包括 HTTP transport、session、CORS、端口启动、VS Code MCP provider 与工具注册
 - `src/lsp/`：对 VS Code LSP 能力的封装，负责定义、引用、补全、重命名、调用层级等操作
 - `src/transform/`：将 VS Code / LSP 返回结果转换成 JSON 或 Markdown
 - `src/utils/`：通用工具，目前主要是日志输出

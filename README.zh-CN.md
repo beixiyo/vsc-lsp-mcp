@@ -54,6 +54,7 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 ## ⚙️ 功能
 
 - 🔄 **LSP 桥接**：将 LSP 功能转换为 MCP 工具
+- 🤖 **VS Code Copilot 集成**：直接将本地 MCP 服务器注册到 VS Code Chat / Copilot
 - 🔌 **多实例支持**：自动处理多个 VSCode 窗口的端口冲突
 - 🧠 **16 项 LSP 操作**：涵盖代码导航（定义、声明、实现、引用）、文档信息（悬停、补全）、结构分析（文档/工作区符号、调用层次）、代码重构（重命名）
 - ☕ **Java 依赖源码**：通过 `jdt://` URI 获取 jdtls 反编译的类源码，便于 AI 阅读依赖库实现
@@ -85,7 +86,7 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 - `newName` — 仅 `rename` 操作需要
 - `query` — 仅 `workspace_symbols` 操作需要
 
-> **1-based 位置**：输入和输出都使用 1-based 行列值，与编辑器显示一致。VS Code 显示 `Ln 9, Col 16` → 传 `line: 9, character: 16`。输出中的位置值可直接用于下一次调用，无需任何转换。
+> **1-based 位置**：输入和输出都使用 1-based 行列值，与编辑器显示一致。VS Code 显示 `Ln 9, Col 16` → 传 `line: 9, character: 16`。输出中的位置值可直接用于下一次调用，无需任何转换
 
 ## 📋 配置
 
@@ -106,6 +107,12 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 <!-- configs -->
 
 ## 🔗 与 AI 工具集成
+
+### VS Code Copilot
+
+无需配置 `mcp.json`。扩展启动后，会通过 MCP server definition provider 将本地 LSP MCP 服务器注册到 VS Code
+
+可以在 VS Code 中通过 **MCP: List Servers** 或聊天工具选择器启用和管理 **LSP MCP 服务器**
 
 ### Cursor
 
