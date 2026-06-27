@@ -21,10 +21,10 @@ export function startServer(app: express.Express, initialPort: number, maxRetrie
 
       // 如果之前显示过端口冲突提示，则显示最终成功启动的消息
       if (hasShownPortConflict) {
-        window.showInformationMessage(`LSP MCP 启动在 ${currentPort}（原端口 ${initialPort} 被占用）`)
+        window.showInformationMessage(`LSP MCP server started on port ${currentPort} (original port ${initialPort} was occupied).`)
       }
       else {
-        window.showInformationMessage(`LSP MCP 启动在 ${currentPort}`)
+        window.showInformationMessage(`LSP MCP server started on port ${currentPort}.`)
       }
     })
 
@@ -38,7 +38,7 @@ export function startServer(app: express.Express, initialPort: number, maxRetrie
         tryListen()
       }
       else {
-        window.showErrorMessage(`无法启动 LSP MCP 服务: ${err.message}`)
+        window.showErrorMessage(`Failed to start LSP MCP server: ${err.message}`)
       }
     })
   }
