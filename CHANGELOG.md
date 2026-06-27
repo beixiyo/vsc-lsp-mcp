@@ -1,28 +1,18 @@
-## [0.0.2] - 2025-07-11
-### 新增
-- 完成 LSP MCP 的开发，并发布到 VSCode、OpenVSX 扩展市场
+## [0.2.0] - 2026-06-27
 
-## [0.0.3] - 2025-08-19
-### 新增
-- 当多个 VSCode 窗口同时运行时，简化端口冲突提示
-  - 只在第一次端口冲突时显示警告消息，避免产生过多提示
+### Added
+- 集成 VS Code Chat / Copilot MCP server definition provider
+  - 扩展启动后直接向 VS Code 注册本地 HTTP MCP server
+  - 使用实际监听端口生成 `http://127.0.0.1:<port>/mcp`，兼容多窗口端口 fallback
+- 增加扩展 i18n 支持
+  - `package.json` 静态贡献项使用 `package.nls*.json`
+  - 运行时通知使用 `vscode.l10n.t`
+  - 新增中文本地化资源
+- 新增 `AGENTS.md`，记录项目结构、开发命令、VS Code 扩展注意事项和 MCP 协议边界
 
-## [0.0.4] - 2025-10-03
-### 新增
-- 添加跨域配置，方便 Web 测试
-
-## [0.0.5] - 2025-10-04
-### 新增
-- 添加 `Access-Control-Expose-Headers` 配置支持
-  - 新增 `lsp-mcp.cors.exposeHeaders` 配置项，默认值为 `Mcp-Session-Id`
-  - 支持逗号分隔的多个响应头配置
-  - 允许浏览器访问指定的响应头，便于客户端获取会话信息
-
-## [0.0.6] - 2026-03-07
-### 新增
-- 新增 `get_class_file_contents` MCP 工具
-  - 通过 jdt:// URI 获取 jdtls 反编译的 Java 类源码
-  - 典型用法：`get_definition` 返回依赖库中的 jdt:// URI 时，可调用本工具获取该类的反编译源码，便于 AI 阅读依赖实现
+### Changed
+- 最低 VS Code 版本提升到 `^1.101.0`，用于支持 MCP server definition provider API
+- README 的 MCP server 名称统一为 `lsp-mcp`
 
 ## [0.1.0] - 2026-05-15
 
@@ -43,3 +33,34 @@
 - Markdown 格式输出：`references` / `definition` / `declaration` / `implementation` 标题从硬编码 `## Locations` 改为与操作名匹配（`## References`、`## Definition` 等）
 - `pnpm-workspace.yaml` 移除 `allowBuilds` placeholder 残留
 - `src/lsp/tools.ts` 移除多余分号
+
+## [0.0.6] - 2026-03-07
+
+### Added
+- 新增 `get_class_file_contents` MCP 工具
+  - 通过 jdt:// URI 获取 jdtls 反编译的 Java 类源码
+  - 典型用法：`get_definition` 返回依赖库中的 jdt:// URI 时，可调用本工具获取该类的反编译源码，便于 AI 阅读依赖实现
+
+## [0.0.5] - 2025-10-04
+
+### Added
+- 添加 `Access-Control-Expose-Headers` 配置支持
+  - 新增 `lsp-mcp.cors.exposeHeaders` 配置项，默认值为 `Mcp-Session-Id`
+  - 支持逗号分隔的多个响应头配置
+  - 允许浏览器访问指定的响应头，便于客户端获取会话信息
+
+## [0.0.4] - 2025-10-03
+
+### Added
+- 添加跨域配置，方便 Web 测试
+
+## [0.0.3] - 2025-08-19
+
+### Added
+- 当多个 VSCode 窗口同时运行时，简化端口冲突提示
+  - 只在第一次端口冲突时显示警告消息，避免产生过多提示
+
+## [0.0.2] - 2025-07-11
+
+### Added
+- 完成 LSP MCP 的开发，并发布到 VSCode、OpenVSX 扩展市场

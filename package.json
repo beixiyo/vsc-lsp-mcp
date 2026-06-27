@@ -1,7 +1,7 @@
 {
   "name": "lsp-mcp",
   "displayName": "%lsp-mcp.displayName%",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "%lsp-mcp.description%",
   "publisher": "CJL",
   "author": "CJL <2662442385@qq.com>",
