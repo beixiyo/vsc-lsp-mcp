@@ -1,5 +1,5 @@
 import type express from 'express'
-import { window } from 'vscode'
+import { l10n, window } from 'vscode'
 
 /**
  * 尝试启动服务器，如果端口被占用则尝试其他端口
@@ -21,10 +21,16 @@ export function startServer(app: express.Express, initialPort: number, maxRetrie
 
       // 如果之前显示过端口冲突提示，则显示最终成功启动的消息
       if (hasShownPortConflict) {
-        window.showInformationMessage(`LSP MCP server started on port ${currentPort} (original port ${initialPort} was occupied).`)
+        window.showInformationMessage(l10n.t(
+          'LSP MCP server started on port {port} (original port {originalPort} was occupied).',
+          { port: currentPort, originalPort: initialPort },
+        ))
       }
       else {
-        window.showInformationMessage(`LSP MCP server started on port ${currentPort}.`)
+        window.showInformationMessage(l10n.t(
+          'LSP MCP server started on port {port}.',
+          { port: currentPort },
+        ))
       }
     })
 
@@ -38,7 +44,10 @@ export function startServer(app: express.Express, initialPort: number, maxRetrie
         tryListen()
       }
       else {
-        window.showErrorMessage(`Failed to start LSP MCP server: ${err.message}`)
+        window.showErrorMessage(l10n.t(
+          'Failed to start LSP MCP server: {message}',
+          { message: err.message },
+        ))
       }
     })
   }

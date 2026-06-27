@@ -3,7 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js'
 import express from 'express'
-import { window, workspace } from 'vscode'
+import { l10n, window, workspace } from 'vscode'
 import { transports } from './config'
 import { cors } from './cors'
 import { handleSessionRequest } from './session'
@@ -23,7 +23,7 @@ export function startMcp() {
   const exposeHeadersStr: string = config.get('cors.exposeHeaders', 'Mcp-Session-Id')
 
   if (!isMcpEnabled) {
-    window.showInformationMessage('LSP MCP server is disabled by configuration.')
+    window.showInformationMessage(l10n.t('LSP MCP server is disabled by configuration.'))
     return
   }
   const app = express()

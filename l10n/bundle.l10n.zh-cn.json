@@ -1,0 +1,6 @@
+{
+  "LSP MCP server is disabled by configuration.": "LSP MCP 服务器已通过配置禁用。",
+  "LSP MCP server started on port {port} (original port {originalPort} was occupied).": "LSP MCP 服务器已启动在端口 {port}（原端口 {originalPort} 被占用）。",
+  "LSP MCP server started on port {port}.": "LSP MCP 服务器已启动在端口 {port}。",
+  "Failed to start LSP MCP server: {message}": "无法启动 LSP MCP 服务器：{message}"
+}

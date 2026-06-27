@@ -1,8 +1,8 @@
 {
   "name": "lsp-mcp",
-  "displayName": "LSP MCP",
+  "displayName": "%lsp-mcp.displayName%",
   "version": "0.1.0",
-  "description": "LSP MCP Server for VSCode",
+  "description": "%lsp-mcp.description%",
   "publisher": "CJL",
   "author": "CJL <2662442385@qq.com>",
   "license": "MIT",
@@ -16,9 +16,13 @@
   ],
   "main": "./dist/index.js",
   "icon": "res/icon.webp",
+  "l10n": "./l10n",
   "files": [
     "LICENSE.md",
+    "package.nls.json",
+    "package.nls.*.json",
     "dist/*",
+    "l10n/*",
     "res/*",
     "CHANGELOG.md"
   ],
@@ -32,48 +36,48 @@
     "commands": [],
     "configuration": {
       "type": "object",
-      "title": "LSP MCP Server Configuration",
+      "title": "%lsp-mcp.configuration.title%",
       "properties": {
         "lsp-mcp.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Enable or disable the LSP MCP server."
+          "description": "%lsp-mcp.configuration.enabled.description%"
         },
         "lsp-mcp.port": {
           "type": "number",
           "default": 9527,
-          "description": "Port for the LSP MCP server."
+          "description": "%lsp-mcp.configuration.port.description%"
         },
         "lsp-mcp.maxRetries": {
           "type": "number",
           "default": 10,
-          "description": "Maximum number of port retry attempts when the default port is occupied."
+          "description": "%lsp-mcp.configuration.maxRetries.description%"
         },
         "lsp-mcp.cors.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Enable or disable CORS (Cross-Origin Resource Sharing)."
+          "description": "%lsp-mcp.configuration.cors.enabled.description%"
         },
         "lsp-mcp.cors.allowOrigins": {
           "type": "string",
           "default": "*",
-          "description": "Allowed origins for CORS. Use '*' to allow all origins, or provide a comma-separated list of origins (e.g., 'http://localhost:3000,http://localhost:5173')."
+          "description": "%lsp-mcp.configuration.cors.allowOrigins.description%"
         },
         "lsp-mcp.cors.withCredentials": {
           "type": "boolean",
           "default": false,
-          "description": "Whether to allow credentials (cookies, authorization headers) in CORS requests."
+          "description": "%lsp-mcp.configuration.cors.withCredentials.description%"
         },
         "lsp-mcp.cors.exposeHeaders": {
           "type": "string",
           "default": "Mcp-Session-Id",
-          "description": "Headers that browsers are allowed to access. Provide a comma-separated list of headers (e.g., 'Mcp-Session-Id,Content-Type')."
+          "description": "%lsp-mcp.configuration.cors.exposeHeaders.description%"
         },
         "lsp-mcp.maxResults": {
           "type": "number",
           "default": 200,
           "minimum": 1,
-          "description": "Maximum number of items returned for list-type results (completions, workspace_symbols, etc.). Prevents excessive token usage."
+          "description": "%lsp-mcp.configuration.maxResults.description%"
         },
         "lsp-mcp.outputFormat": {
           "type": "string",
@@ -82,7 +86,7 @@
             "json",
             "markdown"
           ],
-          "description": "Output format for LSP operation results. 'json' for machine-readable JSON, 'markdown' for LLM-friendly Markdown."
+          "description": "%lsp-mcp.configuration.outputFormat.description%"
         }
       }
     }

@@ -1,0 +1,14 @@
+{
+  "lsp-mcp.displayName": "LSP MCP",
+  "lsp-mcp.description": "LSP MCP Server for VSCode",
+  "lsp-mcp.configuration.title": "LSP MCP Server Configuration",
+  "lsp-mcp.configuration.enabled.description": "Enable or disable the LSP MCP server.",
+  "lsp-mcp.configuration.port.description": "Port for the LSP MCP server.",
+  "lsp-mcp.configuration.maxRetries.description": "Maximum number of port retry attempts when the default port is occupied.",
+  "lsp-mcp.configuration.cors.enabled.description": "Enable or disable CORS (Cross-Origin Resource Sharing).",
+  "lsp-mcp.configuration.cors.allowOrigins.description": "Allowed origins for CORS. Use '*' to allow all origins, or provide a comma-separated list of origins (e.g., 'http://localhost:3000,http://localhost:5173').",
+  "lsp-mcp.configuration.cors.withCredentials.description": "Whether to allow credentials (cookies, authorization headers) in CORS requests.",
+  "lsp-mcp.configuration.cors.exposeHeaders.description": "Headers that browsers are allowed to access. Provide a comma-separated list of headers (e.g., 'Mcp-Session-Id,Content-Type').",
+  "lsp-mcp.configuration.maxResults.description": "Maximum number of items returned for list-type results (completions, workspace_symbols, etc.). Prevents excessive token usage.",
+  "lsp-mcp.configuration.outputFormat.description": "Output format for LSP operation results. 'json' for machine-readable JSON, 'markdown' for LLM-friendly Markdown."
+}
