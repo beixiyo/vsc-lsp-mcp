@@ -1,5 +1,6 @@
 import type { Formatter } from './types'
 import * as vscode from 'vscode'
+import { tMcp } from '../i18n'
 import {
   extractContentText,
   flattenCallHierarchyItem,
@@ -73,7 +74,7 @@ export class TransformService {
 
     const result = this._getFormatter().formatCompletions(items)
     if (total > maxResults) {
-      return `${result}\n\n(Showing ${maxResults} of ${total} items)`
+      return `${result}\n\n${tMcp('(Showing {maxResults} of {total} items)', { maxResults, total })}`
     }
     return result
   }
@@ -137,7 +138,7 @@ export class TransformService {
 
     const result = this._getFormatter().formatWorkspaceSymbols(items)
     if (total > maxResults) {
-      return `${result}\n\n(Showing ${maxResults} of ${total} symbols)`
+      return `${result}\n\n${tMcp('(Showing {maxResults} of {total} symbols)', { maxResults, total })}`
     }
     return result
   }

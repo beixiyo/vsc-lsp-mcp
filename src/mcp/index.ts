@@ -5,6 +5,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js'
 import express from 'express'
 import { l10n, window, workspace } from 'vscode'
+import { initMcpLocale } from '../i18n'
 import { transports } from './config'
 import { cors } from './cors'
 import { registerMcpServerProvider } from './provider'
@@ -105,6 +106,9 @@ export function startMcp(context: ExtensionContext) {
 
   // Handle GET requests for server-to-client notifications via SSE
   app.get('/mcp', handleSessionRequest)
+
+  // 初始化 MCP 语言配置
+  initMcpLocale()
 
   // 尝试启动服务器，处理端口冲突
   startServer(app, mcpPort, maxRetries, {

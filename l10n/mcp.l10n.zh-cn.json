@@ -1,0 +1,31 @@
+{
+  "Execute LSP Operation": "执行 LSP 操作",
+
+  "Execute an LSP operation.\n\nIMPORTANT — All positions are 1-based:\n- Input: line & character use 1-based indexing (matching editor display). VS Code shows \"Ln 9, Col 16\" → pass line=9, character=16.\n- Output: all line/character values in results are also 1-based. You can directly use output positions (e.g. namePosition \"9:16\") as input for the next call (line=9, character=16) — no conversion needed.\n\nOperations requiring line & character:\n- hover: Get hover documentation (signature, JSDoc) at position. Returns: formatted documentation text.\n- definition: Jump to symbol definition. Returns: file path + line range.\n- declaration: Jump to symbol declaration (e.g. TypeScript .d.ts). Returns: file path + line range.\n- implementation: Jump to implementation (for interfaces/abstract classes). Returns: file path + line range.\n- references: Find all references of symbol. Returns: list of file paths + line ranges.\n- completions: Code completions at position. Returns: up to 50 completion items with kind and detail.\n- rename: Rename symbol across workspace. Requires newName. Returns: summary of files and edits changed.\n- symbol_at_position: Get symbol metadata (name, kind, range, namePosition). Returns: call hierarchy item.\n- incoming_calls: Find all callers of the function at position. Returns: caller list with namePosition for chaining.\n- outgoing_calls: Find all callees of the function at position. Returns: callee list with namePosition for chaining.\n\nOperations that do NOT need line/character:\n- document_symbols: Get symbol outline of the file (only needs uri). Returns: hierarchical symbol tree.\n- workspace_symbols: Search symbols across workspace by query (empty query returns all symbols, truncated by maxResults setting). Returns: matching symbols grouped by file.\n- class_file_contents: Get decompiled Java class source via jdt:// URI (only needs uri). Returns: Java source code.": "执行 LSP 操作。\n\n重要提示 — 所有位置均从 1 开始计数：\n- 输入：行号和字符偏移使用 1-based 索引（与编辑器显示一致）。VS Code 显示 \"Ln 9, Col 16\" → 传入 line=9, character=16。\n- 输出：结果中的所有行号/字符偏移值也是 1-based。你可以直接将输出中的位置（如 namePosition \"9:16\"）作为下一次调用的输入（line=9, character=16），无需转换。\n\n需要行号和字符偏移的操作：\n- hover: 获取指定位置的悬停文档（签名、JSDoc）。返回：格式化的文档文本。\n- definition: 跳转到符号定义。返回：文件路径 + 行范围。\n- declaration: 跳转到符号声明（如 TypeScript .d.ts）。返回：文件路径 + 行范围。\n- implementation: 跳转到实现（用于接口/抽象类）。返回：文件路径 + 行范围。\n- references: 查找符号的所有引用。返回：文件路径 + 行范围列表。\n- completions: 指定位置的代码补全。返回：最多 50 个补全项，包含类型和详情。\n- rename: 在工作区中重命名符号。需要 newName 参数。返回：修改的文件和编辑汇总。\n- symbol_at_position: 获取符号元数据（名称、类型、范围、namePosition）。返回：调用层级项。\n- incoming_calls: 查找指定位置函数的所有调用者。返回：调用者列表，包含用于链式调用的 namePosition。\n- outgoing_calls: 查找指定位置函数的所有被调用者。返回：被调用者列表，包含用于链式调用的 namePosition。\n\n不需要行号和字符偏移的操作：\n- document_symbols: 获取文件的符号大纲（只需要 uri）。返回：层级符号树。\n- workspace_symbols: 通过查询搜索工作区中的符号（空查询返回所有符号，受 maxResults 设置截断）。返回：按文件分组的匹配符号。\n- class_file_contents: 通过 jdt:// URI 获取反编译的 Java 类源码（只需要 uri）。返回：Java 源代码。",
+
+  "URI or absolute file path.\n- Plain path (no scheme): treated as absolute file path on disk, e.g. \"/home/user/file.ts\" or \"C:/path/to/file.ts\". Recommended for all file operations.\n- URI with scheme (e.g. file://, jdt://): parsed directly. Scheme part is case-insensitive, path requires proper percent-encoding. Do NOT construct file:// URIs manually.\n- For \"class_file_contents\": must be a jdt:// URI (scheme \"jdt:\").": "URI 或绝对文件路径。\n- 纯路径（无 scheme）：视为磁盘上的绝对文件路径，例如 \"/home/user/file.ts\" 或 \"C:/path/to/file.ts\"。建议所有文件操作使用此格式。\n- 带 scheme 的 URI（如 file://、jdt://）：直接解析。scheme 部分大小写不敏感，路径需要正确的 percent-encoding。不要手动构造 file:// URI。\n- 对于 \"class_file_contents\"：必须是 jdt:// URI（scheme \"jdt:\"）。",
+
+  "Which LSP operation to execute.": "要执行的 LSP 操作。",
+  "Line number (1-based, as shown in editor). Required for position-dependent operations.": "行号（从 1 开始，与编辑器显示一致）。需要位置的操作必须提供。",
+  "Character offset (1-based, as shown in editor). Required for position-dependent operations.": "字符偏移（从 1 开始，与编辑器显示一致）。需要位置的操作必须提供。",
+  "New symbol name. Required only for \"rename\".": "新符号名称。仅在 \"rename\" 时需要。",
+  "Search query. Required only for \"workspace_symbols\".": "搜索查询。仅在 \"workspace_symbols\" 时需要。",
+
+  "No hover information available.": "没有可用的悬停信息。",
+  "No completions available.": "没有可用的补全项。",
+  "No {label} found.": "未找到 {label}。",
+  "Renamed to `{newName}` across {filesChanged} file(s) ({totalEdits} total edit(s)).": "已将符号重命名为 `{newName}`，涉及 {filesChanged} 个文件（共 {totalEdits} 处编辑）。",
+  "No symbols found.": "未找到符号。",
+  "No items found.": "未找到项目。",
+  "No incoming calls found.": "未找到调用者。",
+  "No outgoing calls found or operation not supported.": "未找到被调用者或操作不支持。",
+
+  "(Showing {maxResults} of {total} items)": "（显示 {total} 项中的前 {maxResults} 项）",
+  "(Showing {maxResults} of {total} symbols)": "（显示 {total} 个符号中的前 {maxResults} 个）",
+
+  "line {range}": "行 {range}",
+  "name at {pos}": "名称位置 {pos}",
+  "detail: {detail}": "详情：{detail}",
+  "nested in `{containerName}`": "嵌套于 `{containerName}`",
+  "called at: {sites}": "调用位置：{sites}"
+}

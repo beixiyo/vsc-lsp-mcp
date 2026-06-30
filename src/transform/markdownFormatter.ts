@@ -1,4 +1,5 @@
 import type { Formatter } from './types'
+import { tMcp } from '../i18n'
 
 /**
  * MarkdownFormatter converts flattened LSP data into LLM-friendly Markdown text.
@@ -12,14 +13,14 @@ import type { Formatter } from './types'
 export class MarkdownFormatter implements Formatter {
   formatHover(contents: string[]): string {
     if (contents.length === 0) {
-      return '## Hover\n\nNo hover information available.'
+      return `## Hover\n\n${tMcp('No hover information available.')}`
     }
     return `## Hover\n\n${contents.join('\n\n---\n\n')}`
   }
 
   formatCompletions(items: Record<string, any>[]): string {
     if (items.length === 0) {
-      return '## Completions\n\nNo completions available.'
+      return `## Completions\n\n${tMcp('No completions available.')}`
     }
 
     const lines = items.map((item) => {
@@ -36,7 +37,7 @@ export class MarkdownFormatter implements Formatter {
 
   formatLocations(locations: Record<string, any>[], label = 'Locations'): string {
     if (locations.length === 0) {
-      return `## ${label}\n\nNo ${label.toLowerCase()} found.`
+      return `## ${label}\n\n${tMcp('No {label} found.', { label: label.toLowerCase() })}`
     }
 
     const grouped: Record<string, string[]> = {}
@@ -47,14 +48,18 @@ export class MarkdownFormatter implements Formatter {
     }
 
     const lines = Object.entries(grouped).map(([file, ranges]) =>
-      `- \`${file}\`: ${ranges.map(r => `line ${r}`).join(', ')}`,
+      `- \`${file}\`: ${ranges.map(r => tMcp('line {range}', { range: r })).join(', ')}`,
     )
 
     return `## ${label}\n\n${lines.join('\n')}`
   }
 
   formatRename(result: Record<string, any>): string {
-    return `## Rename\n\nRenamed to \`${result.newName}\` across ${result.filesChanged} file(s) (${result.totalEdits} total edit(s)).`
+    return `## Rename\n\n${tMcp('Renamed to `{newName}` across {filesChanged} file(s) ({totalEdits} total edit(s)).', {
+      newName: result.newName,
+      filesChanged: result.filesChanged,
+      totalEdits: result.totalEdits,
+    })}`
   }
 
   formatClassFile(text: string): string {
@@ -64,7 +69,7 @@ export class MarkdownFormatter implements Formatter {
 
   formatDocumentSymbols(symbols: Record<string, any>[]): string {
     if (symbols.length === 0)
-      return '## Document Symbols\n\nNo symbols found.'
+      return `## Document Symbols\n\n${tMcp('No symbols found.')}`
 
     const lines = symbols.map(s => this._renderFlatSymbol(s, 0))
     return `## Document Symbols\n\n${lines.join('\n')}`
@@ -72,7 +77,7 @@ export class MarkdownFormatter implements Formatter {
 
   formatWorkspaceSymbols(symbols: Record<string, any>[]): string {
     if (symbols.length === 0)
-      return '## Workspace Symbols\n\nNo symbols found.'
+      return `## Workspace Symbols\n\n${tMcp('No symbols found.')}`
     const grouped: Record<string, any[]> = {}
 
     for (const s of symbols) {
@@ -86,9 +91,9 @@ export class MarkdownFormatter implements Formatter {
 
     const lines = Object.entries(grouped).flatMap(([file, items]) => {
       const itemLines = items.map((item) => {
-        const parts: string[] = [`line ${item.range}`]
+        const parts: string[] = [tMcp('line {range}', { range: item.range })]
         if (item.containerName)
-          parts.push(`nested in \`${item.containerName}\``)
+          parts.push(tMcp('nested in `{containerName}`', { containerName: item.containerName }))
         return `  - \`${item.name}\` (${item.kind}): ${parts.join(', ')}`
       })
       return [`\`${file}\``, ...itemLines]
@@ -99,7 +104,7 @@ export class MarkdownFormatter implements Formatter {
 
   formatCallHierarchyItems(items: Record<string, any>[]): string {
     if (items.length === 0)
-      return '## Call Hierarchy\n\nNo items found.'
+      return `## Call Hierarchy\n\n${tMcp('No items found.')}`
 
     const grouped: Record<string, any[]> = {}
     for (const item of items) {
@@ -113,11 +118,11 @@ export class MarkdownFormatter implements Formatter {
 
     const lines = Object.entries(grouped).flatMap(([file, items]) => {
       const itemLines = items.map((item) => {
-        const parts: string[] = [`line ${item.range}`]
+        const parts: string[] = [tMcp('line {range}', { range: item.range })]
         if (item.namePosition)
-          parts.push(`name at ${item.namePosition}`)
+          parts.push(tMcp('name at {pos}', { pos: item.namePosition }))
         if (item.detail)
-          parts.push(`detail: ${item.detail}`)
+          parts.push(tMcp('detail: {detail}', { detail: item.detail }))
         return `  - \`${item.name}\` (${item.kind}): ${parts.join(', ')}`
       })
       return [`\`${file}\``, ...itemLines]
@@ -128,7 +133,7 @@ export class MarkdownFormatter implements Formatter {
 
   formatIncomingCalls(calls: Record<string, any>[]): string {
     if (calls.length === 0)
-      return '## Incoming Calls\n\nNo incoming calls found.'
+      return `## Incoming Calls\n\n${tMcp('No incoming calls found.')}`
     const grouped: Record<string, any[]> = {}
 
     for (const call of calls) {
@@ -142,11 +147,11 @@ export class MarkdownFormatter implements Formatter {
 
     const lines = Object.entries(grouped).flatMap(([file, items]) => {
       const itemLines = items.map((call) => {
-        const parts: string[] = [`line ${call.caller.range}`]
+        const parts: string[] = [tMcp('line {range}', { range: call.caller.range })]
         if (call.caller.namePosition)
-          parts.push(`name at ${call.caller.namePosition}`)
+          parts.push(tMcp('name at {pos}', { pos: call.caller.namePosition }))
         if (call.callSites?.length)
-          parts.push(`called at: ${call.callSites.join(', ')}`)
+          parts.push(tMcp('called at: {sites}', { sites: call.callSites.join(', ') }))
         return `  - \`${call.caller.name}\` (${call.caller.kind}): ${parts.join(', ')}`
       })
       return [`\`${file}\``, ...itemLines]
@@ -157,7 +162,7 @@ export class MarkdownFormatter implements Formatter {
 
   formatOutgoingCalls(calls: Record<string, any>[]): string {
     if (calls.length === 0)
-      return '## Outgoing Calls\n\nNo outgoing calls found or operation not supported.'
+      return `## Outgoing Calls\n\n${tMcp('No outgoing calls found or operation not supported.')}`
     const grouped: Record<string, any[]> = {}
 
     for (const call of calls) {
@@ -171,11 +176,11 @@ export class MarkdownFormatter implements Formatter {
 
     const lines = Object.entries(grouped).flatMap(([file, items]) => {
       const itemLines = items.map((call) => {
-        const parts: string[] = [`line ${call.callee.range}`]
+        const parts: string[] = [tMcp('line {range}', { range: call.callee.range })]
         if (call.callee.namePosition)
-          parts.push(`name at ${call.callee.namePosition}`)
+          parts.push(tMcp('name at {pos}', { pos: call.callee.namePosition }))
         if (call.callSites?.length)
-          parts.push(`called at: ${call.callSites.join(', ')}`)
+          parts.push(tMcp('called at: {sites}', { sites: call.callSites.join(', ') }))
         return `  - \`${call.callee.name}\` (${call.callee.kind}): ${parts.join(', ')}`
       })
       return [`\`${file}\``, ...itemLines]
@@ -195,13 +200,13 @@ export class MarkdownFormatter implements Formatter {
     const indent = '  '.repeat(depth)
     const parts: string[] = []
     if (sym.range)
-      parts.push(`line ${sym.range}`)
+      parts.push(tMcp('line {range}', { range: sym.range }))
     if (sym.namePosition)
-      parts.push(`name at ${sym.namePosition}`)
+      parts.push(tMcp('name at {pos}', { pos: sym.namePosition }))
     if (sym.detail)
-      parts.push(`detail: ${sym.detail}`)
+      parts.push(tMcp('detail: {detail}', { detail: sym.detail }))
     if (sym.containerName)
-      parts.push(`nested in \`${sym.containerName}\``)
+      parts.push(tMcp('nested in `{containerName}`', { containerName: sym.containerName }))
 
     let line = `${indent}- \`${sym.name}\` (${sym.kind})`
     if (parts.length > 0)

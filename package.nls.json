@@ -9,5 +9,6 @@
   "lsp-mcp.configuration.cors.withCredentials.description": "Whether to allow credentials (cookies, authorization headers) in CORS requests.",
   "lsp-mcp.configuration.cors.exposeHeaders.description": "Headers that browsers are allowed to access. Provide a comma-separated list of headers (e.g., 'Mcp-Session-Id,Content-Type').",
   "lsp-mcp.configuration.maxResults.description": "Maximum number of items returned for list-type results (completions, workspace_symbols, etc.). Prevents excessive token usage.",
-  "lsp-mcp.configuration.outputFormat.description": "Output format for LSP operation results. 'json' for machine-readable JSON, 'markdown' for LLM-friendly Markdown."
+  "lsp-mcp.configuration.outputFormat.description": "Output format for LSP operation results. 'json' for machine-readable JSON, 'markdown' for LLM-friendly Markdown.",
+  "lsp-mcp.configuration.mcpLocale.description": "Language for MCP tool descriptions and responses. 'none' follows VS Code display language."
 }

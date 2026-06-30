@@ -93,6 +93,16 @@
             "markdown"
           ],
           "description": "%lsp-mcp.configuration.outputFormat.description%"
+        },
+        "lsp-mcp.mcpLocale": {
+          "type": "string",
+          "default": "none",
+          "enum": [
+            "none",
+            "en",
+            "zh-cn"
+          ],
+          "description": "%lsp-mcp.configuration.mcpLocale.description%"
         }
       }
     }

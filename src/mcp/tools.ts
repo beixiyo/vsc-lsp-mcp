@@ -1,5 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
+import { tMcp } from '../i18n'
 import {
   getClassFileContents,
   getCompletions,
@@ -78,15 +79,15 @@ export function addLspTools(server: McpServer) {
   server.registerTool(
     'execute_lsp',
     {
-      title: 'Execute LSP Operation',
-      description: toolDesc,
+      title: tMcp('Execute LSP Operation'),
+      description: tMcp(toolDesc),
       inputSchema: {
-        operation: z.enum(ops).describe('Which LSP operation to execute.'),
-        uri: z.string().describe(uriDesc),
-        line: z.number().int().min(1).optional().describe('Line number (1-based, as shown in editor). Required for position-dependent operations.'),
-        character: z.number().int().min(1).optional().describe('Character offset (1-based, as shown in editor). Required for position-dependent operations.'),
-        newName: z.string().optional().describe('New symbol name. Required only for "rename".'),
-        query: z.string().optional().describe('Search query. Required only for "workspace_symbols".'),
+        operation: z.enum(ops).describe(tMcp('Which LSP operation to execute.')),
+        uri: z.string().describe(tMcp(uriDesc)),
+        line: z.number().int().min(1).optional().describe(tMcp('Line number (1-based, as shown in editor). Required for position-dependent operations.')),
+        character: z.number().int().min(1).optional().describe(tMcp('Character offset (1-based, as shown in editor). Required for position-dependent operations.')),
+        newName: z.string().optional().describe(tMcp('New symbol name. Required only for "rename".')),
+        query: z.string().optional().describe(tMcp('Search query. Required only for "workspace_symbols".')),
       },
     },
     async ({ operation, uri, line: rawLine, character: rawChar, newName, query }) => {
