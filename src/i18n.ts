@@ -1,4 +1,5 @@
-import { env, l10n, workspace } from 'vscode'
+import type { ExtensionContext } from 'vscode'
+import { env, workspace } from 'vscode'
 
 // ─── Translation bundles ────────────────────────────────────────────
 
@@ -21,26 +22,23 @@ function resolveMcpLocale(): string {
 
 let mcpLocaleResolved = 'en'
 
-export function initMcpLocale(): void {
+/**
+ * Resolve the MCP locale and keep it in sync with configuration changes.
+ * Must be called during activation, before any MCP session is created.
+ */
+export function initMcpLocale(context: ExtensionContext): void {
   mcpLocaleResolved = resolveMcpLocale()
-}
 
-// Listen for configuration changes to re-resolve locale at runtime
-workspace.onDidChangeConfiguration((e) => {
-  if (e.affectsConfiguration('lsp-mcp.mcpLocale')) {
-    mcpLocaleResolved = resolveMcpLocale()
-  }
-})
+  context.subscriptions.push(
+    workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration('lsp-mcp.mcpLocale')) {
+        mcpLocaleResolved = resolveMcpLocale()
+      }
+    }),
+  )
+}
 
 // ─── Public API ─────────────────────────────────────────────────────
-
-/**
- * Translate a user-facing string (VS Code notifications, etc.).
- * Delegates to `vscode.l10n.t` — respects VS Code UI language automatically.
- */
-export function t(key: string, args?: Record<string, string | number>): string {
-  return args ? l10n.t(key, args) : l10n.t(key)
-}
 
 /**
  * Translate an MCP-facing string (tool descriptions, parameter descriptions, responses).
@@ -49,6 +47,8 @@ export function t(key: string, args?: Record<string, string | number>): string {
  *   - `"en"` / `"zh-cn"`: forces that language
  *
  * The `key` is the English fallback text. The Chinese bundle maps English → Chinese.
+ * `{placeholder}` interpolation applies to both the translated and the fallback text;
+ * placeholders missing from `args` are kept verbatim.
  */
 export function tMcp(
   key: string,

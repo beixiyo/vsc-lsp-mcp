@@ -14,6 +14,8 @@ import { startServer } from './startServer'
 import { addLspTools } from './tools'
 
 export function startMcp(context: ExtensionContext) {
+  initMcpLocale(context)
+
   let activePort: number | undefined
   const mcpProvider = registerMcpServerProvider(context, () => activePort)
 
@@ -106,9 +108,6 @@ export function startMcp(context: ExtensionContext) {
 
   // Handle GET requests for server-to-client notifications via SSE
   app.get('/mcp', handleSessionRequest)
-
-  // 初始化 MCP 语言配置
-  initMcpLocale()
 
   // 尝试启动服务器，处理端口冲突
   startServer(app, mcpPort, maxRetries, {
