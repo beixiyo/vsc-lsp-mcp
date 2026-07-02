@@ -1,3 +1,17 @@
+## [0.2.2] - 2026-07-02
+
+### Added
+- 新增 `lsp-mcp.mcpLocale` 配置项，控制 MCP 工具描述与响应文案的语言（#8）
+  - `none`（默认）：跟随 VS Code 显示语言；`en` / `zh-cn`：强制指定语言
+  - 切换配置后实时生效于新建的 MCP 会话，已连接的会话保持原语言（重连即可）
+  - 仅 `outputFormat: markdown` 下响应文案参与翻译，`json` 输出不受影响
+- 新增中文翻译包 `l10n/mcp.l10n.zh-cn.json`，覆盖 `execute_lsp` 工具描述、参数说明与全部响应文案
+- 新增 i18n 单元测试：模板插值（含英文 fallback）、locale 解析与运行时切换、翻译 key 与源码英文原文双向一致性校验
+
+### Changed
+- i18n 模块清理：移除未使用的 `t()` 包装，MCP 文案统一走 `tMcp()`，VS Code 通知文案继续使用 `vscode.l10n.t`
+- `mcpLocale` 配置监听器纳入 `context.subscriptions` 统一销毁，并在 MCP 启动前完成 locale 初始化
+
 ## [0.2.1] - 2026-06-27
 
 ### Fixed
