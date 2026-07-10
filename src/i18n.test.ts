@@ -73,6 +73,7 @@ describe('translation bundle consistency', () => {
   const root = fileURLToPath(new URL('..', import.meta.url))
   const sourceFiles = [
     'src/mcp/tools.ts',
+    'src/mcp/workspaceTools.ts',
     'src/transform/markdownFormatter.ts',
     'src/transform/pipeline.ts',
   ]

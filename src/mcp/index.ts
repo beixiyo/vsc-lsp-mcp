@@ -12,6 +12,7 @@ import { registerMcpServerProvider } from './provider'
 import { handleSessionRequest } from './session'
 import { startServer } from './startServer'
 import { addLspTools } from './tools'
+import { addWorkspaceTools } from './workspaceTools'
 
 export function startMcp(context: ExtensionContext) {
   initMcpLocale(context)
@@ -85,6 +86,7 @@ export function startMcp(context: ExtensionContext) {
 
       // Add LSP tools to the server
       addLspTools(server)
+      addWorkspaceTools(server)
 
       // Connect to the MCP server
       await server.connect(transport)

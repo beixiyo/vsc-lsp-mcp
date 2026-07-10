@@ -27,6 +27,10 @@ export class JsonFormatter implements Formatter {
     return JSON.stringify(result)
   }
 
+  formatResourceRename(result: Record<string, any>): string {
+    return JSON.stringify(result)
+  }
+
   formatClassFile(text: string): string {
     return JSON.stringify({ language: 'java', source: text })
   }

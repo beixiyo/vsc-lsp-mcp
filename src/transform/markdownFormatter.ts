@@ -62,6 +62,13 @@ export class MarkdownFormatter implements Formatter {
     })}`
   }
 
+  formatResourceRename(result: Record<string, any>): string {
+    return `## Resource Rename\n\n${tMcp('Renamed `{oldUri}` to `{newUri}`.', {
+      oldUri: result.oldUri,
+      newUri: result.newUri,
+    })}`
+  }
+
   formatClassFile(text: string): string {
     const escaped = text.replace(/```/g, '\\`\\`\\`')
     return `## Class File Contents\n\n\`\`\`java\n${escaped}\n\`\`\``

@@ -39,6 +39,14 @@ export interface Formatter {
   formatRename: (result: Record<string, any>) => string
 
   /**
+   * Format a workspace resource rename result
+   *
+   * @param result - Resource rename details ({applied, oldUri, newUri})
+   * @returns Formatted string
+   */
+  formatResourceRename: (result: Record<string, any>) => string
+
+  /**
    * Format decompiled class file source text
    *
    * @param text - Raw source code string

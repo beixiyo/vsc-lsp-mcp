@@ -1,3 +1,4 @@
+import type { ResourceRenameResult } from '../workspace'
 import type { Formatter } from './types'
 import * as vscode from 'vscode'
 import { tMcp } from '../i18n'
@@ -118,6 +119,10 @@ export class TransformService {
       filesChanged,
       totalEdits,
     })
+  }
+
+  formatResourceRename(result: ResourceRenameResult): string {
+    return this._getFormatter().formatResourceRename(result)
   }
 
   formatClassFile(text: string): string {

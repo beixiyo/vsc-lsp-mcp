@@ -11,10 +11,17 @@
   "New symbol name. Required only for \"rename\".": "新符号名称。仅在 \"rename\" 时需要。",
   "Search query. Required only for \"workspace_symbols\".": "搜索查询。仅在 \"workspace_symbols\" 时需要。",
 
+  "Rename Workspace Resource": "重命名工作区资源",
+  "Rename a file or directory through VS Code. Language extensions can update affected references during the operation.": "通过 VS Code 重命名文件或目录。语言扩展可在操作期间更新受影响的引用。",
+  "Source absolute file system path or URI.\n- Plain paths are converted with VS Code's Uri.file().\n- URI values retain their scheme, including remote workspace schemes.": "源文件系统绝对路径或 URI。\n- 纯路径通过 VS Code 的 Uri.file() 转换。\n- URI 保留其 scheme，包括远程工作区 scheme。",
+  "Destination absolute file system path or URI.\n- Plain paths are converted with VS Code's Uri.file().\n- URI values retain their scheme, including remote workspace schemes.": "目标文件系统绝对路径或 URI。\n- 纯路径通过 VS Code 的 Uri.file() 转换。\n- URI 保留其 scheme，包括远程工作区 scheme。",
+  "Whether an existing destination may be replaced. Defaults to false.": "是否允许替换已存在的目标。默认为 false。",
+
   "No hover information available.": "没有可用的悬停信息。",
   "No completions available.": "没有可用的补全项。",
   "No {label} found.": "未找到 {label}。",
   "Renamed to `{newName}` across {filesChanged} file(s) ({totalEdits} total edit(s)).": "已将符号重命名为 `{newName}`，涉及 {filesChanged} 个文件（共 {totalEdits} 处编辑）。",
+  "Renamed `{oldUri}` to `{newUri}`.": "已将 `{oldUri}` 重命名为 `{newUri}`。",
   "No symbols found.": "未找到符号。",
   "No items found.": "未找到项目。",
   "No incoming calls found.": "未找到调用者。",
