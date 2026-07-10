@@ -88,6 +88,14 @@ All operations are invoked through the single `execute_lsp` MCP tool with a unif
 
 > **1-based positions**: Both input and output use 1-based line/character values, matching what your editor displays. VS Code shows `Ln 9, Col 16` → pass `line: 9, character: 16`. Output positions can be used directly as input for the next call — no conversion needed.
 
+### Workspace tools (Unreleased)
+
+| Tool | Description |
+|------|-------------|
+| `rename_resource` | Rename a file or directory through VS Code's `WorkspaceEdit` API. Accepts `oldUri`, `newUri`, and optional `overwrite` parameters. |
+
+> **Known issue:** On VS Code 1.115, resources are renamed successfully, but TypeScript import paths may not update. Check stale paths and run type checking afterward.
+
 ## 📋 Configuration
 
 <!-- configs -->

@@ -88,6 +88,14 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 
 > **1-based 位置**：输入和输出都使用 1-based 行列值，与编辑器显示一致。VS Code 显示 `Ln 9, Col 16` → 传 `line: 9, character: 16`。输出中的位置值可直接用于下一次调用，无需任何转换
 
+### Workspace 工具（Unreleased）
+
+| 工具 | 描述 |
+|------|------|
+| `rename_resource` | 通过 VS Code `WorkspaceEdit` API 重命名文件或目录，接收 `oldUri`、`newUri` 和可选的 `overwrite` 参数 |
+
+> **已知问题：** VS Code 1.115 中资源可成功重命名，但 TypeScript import 路径可能不会更新。使用后请检查旧路径并运行类型检查
+
 ## 📋 配置
 
 <!-- configs -->
