@@ -43,7 +43,6 @@ function fixture(overrides: Partial<InstanceRecord> = {}): InstanceRecord {
     projectId: 'project',
     pid: 1,
     label: 'project',
-    cwd: '/code/project',
     roots: ['/code/project'],
     schemes: ['file'],
     locale: 'en',

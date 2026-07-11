@@ -51,7 +51,6 @@ function fixture(instanceId: string, root: string): InstanceRecord {
     projectId: instanceId,
     pid: 1,
     label: instanceId,
-    cwd: root,
     roots: [root],
     schemes: ['file'],
     locale: 'en',

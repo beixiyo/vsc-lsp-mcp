@@ -130,7 +130,6 @@ async function fakeInstance(instanceId: string, root: string): Promise<{
       projectId: instanceId,
       pid: process.pid,
       label: instanceId,
-      cwd: root,
       roots: [root],
       schemes: ['file'],
       locale: 'en',

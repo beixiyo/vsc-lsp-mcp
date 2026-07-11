@@ -145,7 +145,6 @@ export interface InstanceRecord {
   projectId: string
   pid: number
   label: string
-  cwd: string
   roots: string[]
   schemes: string[]
   remoteName?: string

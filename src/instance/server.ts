@@ -75,7 +75,6 @@ export async function startInstanceServer(
       ...identity,
       pid: process.pid,
       label: workspace.name || identity.projectId,
-      cwd: normalizeRoutingPath(process.cwd()),
       roots,
       schemes: ['file'],
       locale: getMcpLocale(),
