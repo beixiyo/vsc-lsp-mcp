@@ -1,3 +1,15 @@
+## Unreleased
+
+### Added
+- 新增独立多实例 Broker，外部 AI 通过一个稳定 MCP 地址发现并调用多个 VS Code 窗口
+- 新增 `health` 与 `list_instances` 工具，`execute_lsp` / `rename_resource` 支持可选 `instanceId`
+- 支持省略 `instanceId` 时按工作区根目录最长路径前缀自动路由，歧义时明确拒绝猜测
+
+### Changed
+- 每个 VS Code 窗口改为仅监听带随机 token 的 loopback 内部端点
+- 实例注册表使用原子写入、心跳、TTL 清理，Broker 与任意窗口生命周期解耦
+- 多实例首版支持范围明确为本机桌面 `file:` 工作区
+
 ## [0.2.2] - 2026-07-02
 
 ### Added

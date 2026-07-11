@@ -55,12 +55,21 @@ This extension bridges that gap, providing AI tools with the same code intellige
 
 - 🔄 **LSP Bridge**: Converts LSP features into MCP tools
 - 🤖 **VS Code Copilot integration**: Registers the local MCP server directly with VS Code Chat / Copilot
-- 🔌 **Multi-Instance Support**: Automatically handles port conflicts for multiple VSCode windows
+- 🔌 **Multi-Instance Broker**: One stable MCP endpoint discovers and routes requests across all open VS Code windows
 - 🧠 **16 LSP operations** covering navigation (definition, declaration, implementation, references), documentation (hover, completions), structure (document/workspace symbols, call hierarchy), and manipulation (rename)
 - ☕ **Java dependency source**: Get decompiled Java class source via jdt:// URI (from jdtls), so AI can read library implementations
 - 📄 **Dual output format**: JSON for machine processing, Markdown for LLM-friendly reading
 
 ## 🛠️ Exposed MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `health` | Report the shared broker status |
+| `list_instances` | List active VS Code windows, workspace roots, and instance IDs |
+| `execute_lsp` | Execute an LSP operation in an explicitly selected or automatically matched instance |
+| `rename_resource` | Rename a workspace file or directory in the matching instance |
+
+### LSP operations
 
 | Operation | Description |
 |-----------|-------------|
@@ -85,8 +94,21 @@ All operations are invoked through the single `execute_lsp` MCP tool with a unif
 - `character` — character offset (**1-based**, matching editor display). Required for position-dependent operations
 - `newName` — required only for `rename`
 - `query` — required only for `workspace_symbols`
+- `instanceId` — optional instance returned by `list_instances`; takes precedence over automatic path routing
 
 > **1-based positions**: Both input and output use 1-based line/character values, matching what your editor displays. VS Code shows `Ln 9, Col 16` → pass `line: 9, character: 16`. Output positions can be used directly as input for the next call — no conversion needed.
+
+### Multi-instance routing
+
+The extension starts one lightweight internal endpoint per VS Code window and registers it with a shared broker. External clients keep using a single MCP URL. The broker selects an instance in this order:
+
+1. Exact `instanceId`, when provided
+2. Longest workspace-root prefix matching the input file path
+3. The only active instance, when no path can identify one
+
+If two windows open the same project, routing is intentionally rejected as ambiguous until the caller passes `instanceId`. The registry contains no public credentials and stale window records expire automatically.
+
+The first multi-instance release supports local desktop workspaces and `file:` resources. Remote SSH, WSL, Dev Containers, and virtual workspaces are not yet advertised as supported.
 
 ### Workspace tools (Unreleased)
 
@@ -103,7 +125,7 @@ All operations are invoked through the single `execute_lsp` MCP tool with a unif
 | Key                           | Description                                                                                                                                           | Type      | Default |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------- |
 | `lsp-mcp.enabled`             | Enable or disable the LSP MCP server.                                                                                                                 | `boolean` | `true`  |
-| `lsp-mcp.port`                | Port for the LSP MCP server.                                                                                                                          | `number`  | `9527`  |
+| `lsp-mcp.port`                | Preferred port for the shared MCP broker.                                                                                                             | `number`  | `9527`  |
 | `lsp-mcp.maxRetries`          | Maximum number of port retry attempts when the default port is occupied.                                                                              | `number`  | `10`    |
 | `lsp-mcp.cors.enabled`        | Enable or disable CORS (Cross-Origin Resource Sharing).                                                                                               | `boolean` | `true`  |
 | `lsp-mcp.cors.allowOrigins`   | Allowed origins for CORS. Use `*` to allow all origins, or provide a comma-separated list of origins (e.g., `http://localhost:3000,http://localhost:5173`). | `string`  | `*`     |

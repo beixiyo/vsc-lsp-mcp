@@ -9,7 +9,10 @@ const dependencies = Object.keys(pkg.dependencies || {})
 const noExternalPackages = dependencies.filter(dep => !externalPackages.includes(dep))
 
 export default defineConfig({
-  entry: ['./src/index.ts'],
+  entry: {
+    index: './src/index.ts',
+    broker: './src/broker/main.ts',
+  },
   outDir: 'dist',
   format: ['cjs'],
   clean: true,

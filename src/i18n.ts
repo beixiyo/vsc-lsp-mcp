@@ -1,11 +1,6 @@
 import type { ExtensionContext } from 'vscode'
 import { env, workspace } from 'vscode'
-
-// ─── Translation bundles ────────────────────────────────────────────
-
-import _mcpBundleZhCn from '../l10n/mcp.l10n.zh-cn.json'
-
-const mcpBundleZhCn = _mcpBundleZhCn as Record<string, string>
+import { translateMcp } from './mcpLocale'
 
 // ─── Resolve effective MCP locale ────────────────────────────────────
 
@@ -54,17 +49,9 @@ export function tMcp(
   key: string,
   args?: Record<string, string | number>,
 ): string {
-  let template = key
+  return translateMcp(mcpLocaleResolved, key, args)
+}
 
-  if (mcpLocaleResolved === 'zh-cn') {
-    const translated = mcpBundleZhCn[key]
-    if (translated)
-      template = translated
-  }
-
-  if (!args)
-    return template
-
-  return template.replace(/\{(\w+)\}/g, (_, k) =>
-    String(args[k] ?? `{${k}}`))
+export function getMcpLocale(): string {
+  return mcpLocaleResolved
 }

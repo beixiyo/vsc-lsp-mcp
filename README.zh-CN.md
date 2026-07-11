@@ -55,12 +55,21 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 
 - 🔄 **LSP 桥接**：将 LSP 功能转换为 MCP 工具
 - 🤖 **VS Code Copilot 集成**：直接将本地 MCP 服务器注册到 VS Code Chat / Copilot
-- 🔌 **多实例支持**：自动处理多个 VSCode 窗口的端口冲突
+- 🔌 **多实例 Broker**：通过一个稳定 MCP 入口发现并路由到所有已打开的 VS Code 窗口
 - 🧠 **16 项 LSP 操作**：涵盖代码导航（定义、声明、实现、引用）、文档信息（悬停、补全）、结构分析（文档/工作区符号、调用层次）、代码重构（重命名）
 - ☕ **Java 依赖源码**：通过 `jdt://` URI 获取 jdtls 反编译的类源码，便于 AI 阅读依赖库实现
 - 📄 **双格式输出**：JSON 用于机器处理，Markdown 用于 LLM 友好阅读
 
 ## 🛠️ 暴露的 MCP 工具
+
+| 工具 | 描述 |
+|------|------|
+| `health` | 查看共享 Broker 状态 |
+| `list_instances` | 列出活动 VS Code 窗口、工作区根目录和实例 ID |
+| `execute_lsp` | 在显式选择或自动匹配的实例中执行 LSP 操作 |
+| `rename_resource` | 在匹配实例中重命名工作区文件或目录 |
+
+### LSP 操作
 
 | 操作 | 描述 |
 |------|-------------|
@@ -85,8 +94,21 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 - `character` — 列号（**1-based**，与编辑器显示一致）。位置相关操作必填
 - `newName` — 仅 `rename` 操作需要
 - `query` — 仅 `workspace_symbols` 操作需要
+- `instanceId` — 可选，来自 `list_instances`；传入后优先于路径自动路由
 
 > **1-based 位置**：输入和输出都使用 1-based 行列值，与编辑器显示一致。VS Code 显示 `Ln 9, Col 16` → 传 `line: 9, character: 16`。输出中的位置值可直接用于下一次调用，无需任何转换
+
+### 多实例路由
+
+每个 VS Code 窗口启动一个轻量内部端点并注册到共享 Broker。外部 AI 始终连接同一个 MCP URL。Broker 按以下顺序选择实例：
+
+1. 显式传入的 `instanceId`
+2. 与文件路径匹配的最长工作区根目录前缀
+3. 无法通过路径识别且只有一个活动实例时，选择唯一实例
+
+同一项目同时被两个窗口打开时，Broker 会明确返回歧义错误，不会静默猜测；调用方必须传入 `instanceId`。注册表不会向 MCP 客户端暴露内部凭据，失效窗口记录会自动过期
+
+多实例首版仅承诺本机桌面工作区和 `file:` 资源。Remote SSH、WSL、Dev Container 与虚拟工作区暂不声明支持
 
 ### Workspace 工具（Unreleased）
 
@@ -103,7 +125,7 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 | 设置                              | 描述                                                                                       | 类型      | 默认值  |
 | --------------------------------- | ------------------------------------------------------------------------------------------ | --------- | ------- |
 | `lsp-mcp.enabled`                 | 启用或禁用 LSP MCP 服务器                                                                  | `boolean` | `true`  |
-| `lsp-mcp.port`                    | LSP MCP 服务器的端口                                                                       | `number`  | `9527`  |
+| `lsp-mcp.port`                    | 共享 MCP Broker 的首选端口                                                                 | `number`  | `9527`  |
 | `lsp-mcp.maxRetries`              | 端口被占用时的最大重试次数                                                                 | `number`  | `10`    |
 | `lsp-mcp.cors.enabled`            | 启用或禁用 CORS（跨域资源共享）                                                            | `boolean` | `true`  |
 | `lsp-mcp.cors.allowOrigins`       | 允许的 CORS 源。使用 `*` 允许所有源，或提供逗号分隔的源列表（例如 `http://localhost:3000,http://localhost:5173`） | `string`  | `*`     |

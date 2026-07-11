@@ -74,6 +74,8 @@ describe('translation bundle consistency', () => {
   const sourceFiles = [
     'src/mcp/tools.ts',
     'src/mcp/workspaceTools.ts',
+    'src/broker/tools.ts',
+    'src/protocol.ts',
     'src/transform/markdownFormatter.ts',
     'src/transform/pipeline.ts',
   ]
