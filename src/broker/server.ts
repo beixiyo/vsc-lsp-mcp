@@ -20,6 +20,7 @@ const STATE_HEARTBEAT_MS = 5_000
 export async function startBroker(options: BrokerOptions): Promise<BrokerHandle> {
   const app = express()
   const transports = new Map<string, StreamableHTTPServerTransport>()
+
   if (options.corsEnabled) {
     const origins = options.corsOrigins === '*'
       ? '*'
@@ -30,6 +31,7 @@ export async function startBroker(options: BrokerOptions): Promise<BrokerHandle>
       options.corsExposeHeaders.split(',').map(header => header.trim()),
     ))
   }
+
   app.use(express.json({ limit: '1mb' }))
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok', protocolVersion: BROKER_PROTOCOL_VERSION })
@@ -48,6 +50,7 @@ export async function startBroker(options: BrokerOptions): Promise<BrokerHandle>
         allowedHosts: [`127.0.0.1:${port}`, `localhost:${port}`],
         enableDnsRebindingProtection: true,
       })
+
       transport.onclose = () => {
         if (transport?.sessionId)
           transports.delete(transport.sessionId)

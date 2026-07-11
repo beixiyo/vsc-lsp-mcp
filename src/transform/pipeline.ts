@@ -1,17 +1,22 @@
+import type { CallNode, IncomingCallNode, OutgoingCallNode } from '../lsp/callHierarchy'
+import type { CodeActionApplied, CodeActionPreview, CodeActionSummary } from '../lsp/codeActions'
+import type { PrepareRenameResult, RenameApplied, RenamePreview } from '../lsp/rename'
 import type { ResourceRenameResult } from '../workspace'
 import type { Formatter } from './types'
 import * as vscode from 'vscode'
 import {
   extractContentText,
   flattenCallHierarchyItem,
+  flattenDiagnostic,
+  flattenDocumentHighlight,
+  flattenDocumentLink,
   flattenIncomingCall,
-  flattenLabel,
+  flattenInlayHint,
   flattenLocation,
   flattenLocationLink,
   flattenOutgoingCall,
   flattenSymbol,
   flattenWorkspaceSymbols,
-  kindNames,
 } from './flatten'
 import { JsonFormatter } from './jsonFormatter'
 import { MarkdownFormatter } from './markdownFormatter'
@@ -22,7 +27,7 @@ import { MarkdownFormatter } from './markdownFormatter'
  * Data flow:
  *   raw VSCode API value  →  flatten  →  format (JSON or Markdown)
  *
- * - **flatten**: Converts VSCode-API-specific types (Location, Hover, CompletionList, etc.)
+ * - **flatten**: Converts VSCode-API-specific types (Location, Hover, SymbolInformation, etc.)
  *   into plain JSON-compatible objects (Record<string, any>). This strips type wrappers,
  *   resolves URIs to file paths, enumerates numeric kind values to human-readable names,
  *   and discards fields that are irrelevant for output (tags, targetSelectionRange, etc.).
@@ -86,21 +91,6 @@ export class TransformService {
     return this._formatLimited(items, limited => this._getFormatter().formatSignatureHelp(limited))
   }
 
-  formatCompletions(list: vscode.CompletionList): string {
-    const unique = new Map<string, Record<string, any>>()
-    for (const item of list.items) {
-      const flattened = {
-        label: flattenLabel(item.label),
-        kind: item.kind !== undefined ? (kindNames[item.kind] ?? 'Unknown') : undefined,
-        detail: item.detail || undefined,
-      }
-      const key = `${flattened.label}\0${flattened.kind ?? ''}\0${flattened.detail ?? ''}`
-      if (!unique.has(key))
-        unique.set(key, flattened)
-    }
-    return this._formatLimited([...unique.values()], items => this._getFormatter().formatCompletions(items))
-  }
-
   formatLocations(locations: vscode.Location[], label?: string): string {
     return this._formatLimited(locations.map(flattenLocation), items => this._getFormatter().formatLocations(items, label))
   }
@@ -123,20 +113,69 @@ export class TransformService {
     return this._getFormatter().formatLocations([flattenLocation(items)], label)
   }
 
-  formatRename(edit: vscode.WorkspaceEdit, newName: string): string {
-    let filesChanged = 0
-    let totalEdits = 0
-    for (const [, textEdits] of edit.entries()) {
-      if (textEdits.length > 0)
-        filesChanged++
-      totalEdits += textEdits.length
-    }
-    return this._getFormatter().formatRename({
-      success: true,
-      newName,
-      filesChanged,
-      totalEdits,
-    })
+  formatDiagnostics(
+    items: { uri: vscode.Uri, diagnostic: vscode.Diagnostic }[],
+    workspace: boolean,
+  ): string {
+    return this._formatLimited(
+      items.map(item => flattenDiagnostic(item.uri, item.diagnostic)),
+      limited => this._getFormatter().formatDiagnostics(limited, workspace),
+    )
+  }
+
+  formatDocumentHighlights(items: vscode.DocumentHighlight[]): string {
+    return this._formatLimited(
+      items.map(flattenDocumentHighlight),
+      limited => this._getFormatter().formatDocumentHighlights(limited),
+    )
+  }
+
+  formatDocumentLinks(items: vscode.DocumentLink[]): string {
+    return this._formatLimited(
+      items.map(flattenDocumentLink),
+      limited => this._getFormatter().formatDocumentLinks(limited),
+    )
+  }
+
+  formatInlayHints(items: vscode.InlayHint[]): string {
+    return this._formatLimited(
+      items.map(flattenInlayHint),
+      limited => this._getFormatter().formatInlayHints(limited),
+    )
+  }
+
+  formatCodeActions(items: CodeActionSummary[]): string {
+    return this._formatLimited(items, limited => this._getFormatter().formatCodeActions(limited))
+  }
+
+  formatCodeActionPreview(result: CodeActionPreview, documentFix = false): string {
+    const { maxResults } = this._getConfig()
+    const limited = { ...result, edits: result.edits.slice(0, maxResults) }
+    const output = this._getFormatter().formatCodeActionPreview(limited, documentFix)
+    return result.edits.length > maxResults
+      ? this._getFormatter().formatTruncation(output, limited.edits.length, result.edits.length)
+      : output
+  }
+
+  formatCodeActionApplied(result: CodeActionApplied): string {
+    return this._getFormatter().formatCodeActionApplied(result)
+  }
+
+  formatPrepareRename(result: PrepareRenameResult): string {
+    return this._getFormatter().formatPrepareRename(result)
+  }
+
+  formatRenamePreview(result: RenamePreview): string {
+    const { maxResults } = this._getConfig()
+    const limited = { ...result, edits: result.edits.slice(0, maxResults) }
+    const output = this._getFormatter().formatRenamePreview(limited)
+    return result.edits.length > maxResults
+      ? this._getFormatter().formatTruncation(output, limited.edits.length, result.edits.length)
+      : output
+  }
+
+  formatRenameApplied(result: RenameApplied): string {
+    return this._getFormatter().formatRenameApplied(result)
   }
 
   formatResourceRename(result: ResourceRenameResult): string {
@@ -165,15 +204,15 @@ export class TransformService {
     return this._formatLimited(allItems, items => this._getFormatter().formatWorkspaceSymbols(items))
   }
 
-  formatCallHierarchyItems(items: vscode.CallHierarchyItem[]): string {
+  formatCallHierarchyItems(items: CallNode[]): string {
     return this._formatLimited(items.map(flattenCallHierarchyItem), limited => this._getFormatter().formatCallHierarchyItems(limited))
   }
 
-  formatIncomingCalls(calls: vscode.CallHierarchyIncomingCall[]): string {
+  formatIncomingCalls(calls: IncomingCallNode[]): string {
     return this._formatLimited(calls.map(flattenIncomingCall), limited => this._getFormatter().formatIncomingCalls(limited))
   }
 
-  formatOutgoingCalls(calls: vscode.CallHierarchyOutgoingCall[]): string {
+  formatOutgoingCalls(calls: OutgoingCallNode[]): string {
     return this._formatLimited(calls.map(flattenOutgoingCall), limited => this._getFormatter().formatOutgoingCalls(limited))
   }
 

@@ -31,9 +31,11 @@ export async function startInstanceServer(
   const roots = (workspace.workspaceFolders || [])
     .filter(folder => folder.uri.scheme === 'file')
     .map(folder => normalizeRoutingPath(folder.uri.fsPath))
+
   const identity = createInstanceIdentity(roots)
   const token = randomBytes(32).toString('hex')
   const app = express()
+
   app.use(express.json({ limit: '1mb' }))
   app.use((req, res, next) => {
     if (req.header('x-lsp-mcp-token') !== token) {
@@ -46,6 +48,7 @@ export async function startInstanceServer(
   app.get('/internal/health', (_req, res) => {
     res.json({ status: 'ok', instanceId: identity.instanceId })
   })
+
   app.post('/internal/lsp', async (req, res) => {
     try {
       res.json({ result: await executeLspOperation(req.body as ExecuteLspInput) })
@@ -54,6 +57,7 @@ export async function startInstanceServer(
       res.status(500).json({ error: serializeError(error) })
     }
   })
+
   app.post('/internal/rename-resource', async (req, res) => {
     try {
       res.json({ result: await executeResourceRename(req.body as RenameResourceInput) })
@@ -66,6 +70,7 @@ export async function startInstanceServer(
   const server = await listen(app)
   let record: InstanceRecord
   const registryRoot = getRegistryRoot()
+
   try {
     const address = server.address()
     if (!address || typeof address === 'string')

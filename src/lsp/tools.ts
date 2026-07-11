@@ -10,7 +10,7 @@ import { logger } from '../utils/logger'
  * @param input - File path or URI string
  * @returns VSCode Uri
  */
-function resolveUri(input: string): vscode.Uri {
+export function resolveUri(input: string): vscode.Uri {
   if (hasUriScheme(input)) {
     return vscode.Uri.parse(input)
   }

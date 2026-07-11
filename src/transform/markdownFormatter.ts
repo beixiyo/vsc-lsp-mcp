@@ -38,23 +38,6 @@ export class MarkdownFormatter implements Formatter {
     return `## Signature Help\n\n${lines.join('\n')}`
   }
 
-  formatCompletions(items: Record<string, any>[]): string {
-    if (items.length === 0) {
-      return `## Completions\n\n${tMcp('No completions available.')}`
-    }
-
-    const lines = items.map((item) => {
-      let line = `- \`${item.label}\``
-      if (item.kind)
-        line += ` (${item.kind})`
-      if (item.detail)
-        line += `: ${item.detail}`
-      return line
-    })
-
-    return `## Completions\n\n${lines.join('\n')}`
-  }
-
   formatLocations(locations: Record<string, any>[], label = 'Locations'): string {
     if (locations.length === 0) {
       return `## ${label}\n\n${tMcp('No {label} found.', { label: label.toLowerCase() })}`
@@ -74,12 +57,77 @@ export class MarkdownFormatter implements Formatter {
     return `## ${label}\n\n${lines.join('\n')}`
   }
 
-  formatRename(result: Record<string, any>): string {
-    return `## Rename\n\n${tMcp('Renamed to `{newName}` across {filesChanged} file(s) ({totalEdits} total edit(s)).', {
-      newName: result.newName,
-      filesChanged: result.filesChanged,
-      totalEdits: result.totalEdits,
-    })}`
+  formatDiagnostics(items: Record<string, any>[], workspace: boolean): string {
+    const title = workspace ? 'Workspace Diagnostics' : 'Diagnostics'
+    if (items.length === 0)
+      return `## ${title}\n\n${tMcp('No diagnostics found.')}`
+    const grouped: Record<string, Record<string, any>[]> = {}
+    for (const item of items) {
+      if (!grouped[item.file])
+        grouped[item.file] = []
+      grouped[item.file].push(item)
+    }
+    const lines = Object.entries(grouped).flatMap(([file, diagnostics]) => [
+      `\`${file}\``,
+      ...(diagnostics ?? []).map((item) => {
+        const metadata = [
+          item.source && `source: \`${item.source}\``,
+          item.code != null && `code: \`${item.code}\``,
+        ].filter(Boolean).join(', ')
+        return `- ${item.severity} ${item.range}: ${item.message}${metadata ? `, ${metadata}` : ''}`
+      }),
+    ])
+    return `## ${title}\n\n${lines.join('\n')}`
+  }
+
+  formatDocumentHighlights(items: Record<string, any>[]): string {
+    if (items.length === 0)
+      return `## Document Highlights\n\n${tMcp('No document highlights found.')}`
+    return `## Document Highlights\n\n${items.map(item => `- ${item.range} (${item.kind})`).join('\n')}`
+  }
+
+  formatDocumentLinks(items: Record<string, any>[]): string {
+    if (items.length === 0)
+      return `## Document Links\n\n${tMcp('No document links found.')}`
+    return `## Document Links\n\n${items.map(item => `- ${item.range} -> ${item.target ?? 'unresolved'}`).join('\n')}`
+  }
+
+  formatInlayHints(items: Record<string, any>[]): string {
+    if (items.length === 0)
+      return `## Inlay Hints\n\n${tMcp('No inlay hints found.')}`
+    return `## Inlay Hints\n\n${items.map(item => `- ${item.position} ${item.kind}: \`${item.label}\`${item.tooltip ? ` — ${item.tooltip}` : ''}`).join('\n')}`
+  }
+
+  formatCodeActions(items: Record<string, any>[]): string {
+    if (items.length === 0)
+      return `## Code Actions\n\n${tMcp('No editable code actions found.')}`
+    return `## Code Actions\n\n${items.map((item) => {
+      const metadata = [item.kind, item.preferred && 'preferred'].filter(Boolean).join(', ')
+      return `- \`${item.actionId}\`: ${item.title}${metadata ? ` (${metadata})` : ''}`
+    }).join('\n')}`
+  }
+
+  formatCodeActionPreview(result: Record<string, any>, documentFix = false): string {
+    const edits = result.edits.map((edit: Record<string, any>) => `- \`${edit.file}\`: ${edit.range}`).join('\n')
+    const title = documentFix ? 'Fix Document Preview' : 'Code Action Preview'
+    return `## ${title}\n\nAction ID: \`${result.actionId}\`\nTitle: ${result.title}\n${result.filesChanged} files, ${result.edits.length} edits\n${edits}`
+  }
+
+  formatCodeActionApplied(result: Record<string, any>): string {
+    return `## Code Action Applied\n\n- Action ID: \`${result.actionId}\`\n- ${result.filesChanged} files, ${result.editsCount} edits\n- Saved to disk: \`${result.savedToDisk}\``
+  }
+
+  formatPrepareRename(result: Record<string, any>): string {
+    return `## Prepare Rename\n\n- ${result.range}, placeholder: \`${result.placeholder}\``
+  }
+
+  formatRenamePreview(result: Record<string, any>): string {
+    const edits = result.edits.map((edit: Record<string, any>) => `- \`${edit.file}\`: ${edit.range}`).join('\n')
+    return `## Rename Preview\n\nRename ID: \`${result.renameId}\`\nNew name: \`${result.newName}\`; ${result.filesChanged} files, ${result.edits.length} edits\n${edits}`
+  }
+
+  formatRenameApplied(result: Record<string, any>): string {
+    return `## Rename Applied\n\n- Rename ID: \`${result.renameId}\`\n- ${result.filesChanged} files, ${result.editsCount} edits\n- Saved to disk: \`${result.savedToDisk}\``
   }
 
   formatResourceRename(result: Record<string, any>): string {
@@ -150,6 +198,10 @@ export class MarkdownFormatter implements Formatter {
           parts.push(tMcp('name at {pos}', { pos: item.namePosition }))
         if (item.detail)
           parts.push(tMcp('detail: {detail}', { detail: item.detail }))
+        if (item.origin)
+          parts.push(`origin: ${item.origin}`)
+        if (item.callId)
+          parts.push(`callId: \`${item.callId}\``)
         return `  - \`${item.name}\` (${item.kind}): ${parts.join(', ')}`
       })
       return [`\`${file}\``, ...itemLines]
@@ -181,6 +233,10 @@ export class MarkdownFormatter implements Formatter {
           parts.push(tMcp('detail: {detail}', { detail: call.caller.detail }))
         if (call.callSites?.length)
           parts.push(tMcp('called at: {sites}', { sites: call.callSites.join(', ') }))
+        if (call.caller.origin)
+          parts.push(`origin: ${call.caller.origin}`)
+        if (call.caller.callId)
+          parts.push(`callId: \`${call.caller.callId}\``)
         return `  - \`${call.caller.name}\` (${call.caller.kind}): ${parts.join(', ')}`
       })
       return [`\`${file}\``, ...itemLines]
@@ -212,6 +268,10 @@ export class MarkdownFormatter implements Formatter {
           parts.push(tMcp('detail: {detail}', { detail: call.callee.detail }))
         if (call.callSites?.length)
           parts.push(tMcp('called at: {sites}', { sites: call.callSites.join(', ') }))
+        if (call.callee.origin)
+          parts.push(`origin: ${call.callee.origin}`)
+        if (call.callee.callId)
+          parts.push(`callId: \`${call.callee.callId}\``)
         return `  - \`${call.callee.name}\` (${call.callee.kind}): ${parts.join(', ')}`
       })
       return [`\`${file}\``, ...itemLines]

@@ -17,6 +17,7 @@ export async function startMcp(context: ExtensionContext): Promise<void> {
 
   const preferredPort = config.get('port', 9527)
   let instance: Awaited<ReturnType<typeof startInstanceServer>> | undefined
+
   try {
     instance = await startInstanceServer(context)
     const brokerPort = await ensureBroker(context, {
@@ -27,8 +28,10 @@ export async function startMcp(context: ExtensionContext): Promise<void> {
       corsExposeHeaders: config.get('cors.exposeHeaders', 'Mcp-Session-Id'),
       locale: getMcpLocale(),
     })
+
     const provider = registerMcpServerProvider(context, () => brokerPort)
     provider.refresh()
+
     window.showInformationMessage(l10n.t(
       'LSP MCP server started on port {port}.',
       { port: brokerPort },

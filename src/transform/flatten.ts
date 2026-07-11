@@ -14,7 +14,6 @@ function generateEnumNameMap<T extends Record<string, string | number>>(enumObj:
   ) as Record<number, string>
 }
 
-export const kindNames = generateEnumNameMap(vscode.CompletionItemKind)
 export const symbolKindNames = generateEnumNameMap(vscode.SymbolKind)
 
 /**
@@ -64,6 +63,52 @@ export function flattenLocationLink(link: vscode.LocationLink): Record<string, a
   }
 }
 
+export function flattenDiagnostic(uri: vscode.Uri, diagnostic: vscode.Diagnostic): Record<string, any> {
+  const severityNames = ['error', 'warning', 'information', 'hint']
+  return {
+    file: getFile(uri),
+    range: formatRange(diagnostic.range),
+    severity: severityNames[diagnostic.severity] ?? 'information',
+    message: diagnostic.message,
+    source: diagnostic.source || undefined,
+    code: diagnostic.code == null
+      ? undefined
+      : typeof diagnostic.code === 'object' ? diagnostic.code.value : diagnostic.code,
+  }
+}
+
+export function flattenDocumentHighlight(highlight: vscode.DocumentHighlight): Record<string, any> {
+  const kindNames = ['text', 'read', 'write']
+  return {
+    range: formatRange(highlight.range),
+    kind: highlight.kind == null ? 'text' : kindNames[highlight.kind] ?? 'text',
+  }
+}
+
+export function flattenDocumentLink(link: vscode.DocumentLink): Record<string, any> {
+  return {
+    range: formatRange(link.range),
+    target: link.target?.toString(),
+    tooltip: link.tooltip || undefined,
+  }
+}
+
+export function flattenInlayHint(hint: vscode.InlayHint): Record<string, any> {
+  const label = typeof hint.label === 'string'
+    ? hint.label
+    : hint.label.map(part => part.value).join('')
+  return {
+    position: `${hint.position.line + 1}:${hint.position.character + 1}`,
+    label,
+    kind: hint.kind === vscode.InlayHintKind.Parameter
+      ? 'parameter'
+      : hint.kind === vscode.InlayHintKind.Type ? 'type' : 'other',
+    tooltip: typeof hint.tooltip === 'string'
+      ? hint.tooltip
+      : hint.tooltip?.value,
+  }
+}
+
 /**
  * Extract plain text from hover content item
  *
@@ -78,23 +123,6 @@ export function extractContentText(content: vscode.MarkdownString | vscode.Marke
     return content.value
   }
   return content.value
-}
-
-/**
- * Flatten completion item label into a single string
- *
- * @param label - Completion item label which may be string or CompletionItemLabel
- * @returns Flattened label text
- */
-export function flattenLabel(label: string | vscode.CompletionItemLabel): string {
-  if (typeof label === 'string')
-    return label
-  let result = label.label
-  if (label.detail)
-    result += label.detail
-  if (label.description)
-    result += ` (${label.description})`
-  return result
 }
 
 /**
@@ -263,7 +291,12 @@ export async function flattenWorkspaceSymbols(
  * @param item - VSCode CallHierarchyItem
  * @returns Plain object with name, kind, detail, file, range, namePosition
  */
-export function flattenCallHierarchyItem(item: vscode.CallHierarchyItem): Record<string, any> {
+export function flattenCallHierarchyItem(node: {
+  item: vscode.CallHierarchyItem
+  callId: string
+  origin: string
+}): Record<string, any> {
+  const { item } = node
   return {
     name: item.name,
     kind: symbolKindNames[item.kind] ?? 'Unknown',
@@ -271,6 +304,8 @@ export function flattenCallHierarchyItem(item: vscode.CallHierarchyItem): Record
     file: getFile(item.uri),
     range: formatRange(item.range),
     namePosition: formatRange(item.selectionRange).split('-')[0],
+    callId: node.callId,
+    origin: node.origin,
   }
 }
 
@@ -280,9 +315,9 @@ export function flattenCallHierarchyItem(item: vscode.CallHierarchyItem): Record
  * @param call - VSCode CallHierarchyIncomingCall
  * @returns Plain object with caller info and call site ranges
  */
-export function flattenIncomingCall(call: vscode.CallHierarchyIncomingCall): Record<string, any> {
+export function flattenIncomingCall(call: { node: Parameters<typeof flattenCallHierarchyItem>[0], fromRanges: vscode.Range[] }): Record<string, any> {
   return {
-    caller: flattenCallHierarchyItem(call.from),
+    caller: flattenCallHierarchyItem(call.node),
     callSites: call.fromRanges.map(formatRange),
   }
 }
@@ -293,9 +328,9 @@ export function flattenIncomingCall(call: vscode.CallHierarchyIncomingCall): Rec
  * @param call - VSCode CallHierarchyOutgoingCall
  * @returns Plain object with callee info and call site ranges
  */
-export function flattenOutgoingCall(call: vscode.CallHierarchyOutgoingCall): Record<string, any> {
+export function flattenOutgoingCall(call: { node: Parameters<typeof flattenCallHierarchyItem>[0], fromRanges: vscode.Range[] }): Record<string, any> {
   return {
-    callee: flattenCallHierarchyItem(call.to),
+    callee: flattenCallHierarchyItem(call.node),
     callSites: call.fromRanges.map(formatRange),
   }
 }

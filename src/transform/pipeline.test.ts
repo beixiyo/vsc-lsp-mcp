@@ -4,7 +4,6 @@ const get = vi.fn()
 let outputFormat = 'json'
 
 vi.mock('vscode', () => ({
-  CompletionItemKind: { Function: 2, 2: 'Function' },
   SymbolKind: {
     Module: 1,
     Function: 11,
@@ -34,37 +33,6 @@ describe('transformService result limits', () => {
 
   beforeEach(() => {
     outputFormat = 'json'
-  })
-
-  it('deduplicates completions and reports shown/total when truncated', async () => {
-    const { TransformService } = await import('./pipeline')
-    const service = new TransformService()
-    const output = service.formatCompletions({
-      items: [
-        { label: 'alpha', kind: 2, detail: 'first' },
-        { label: 'alpha', kind: 2, detail: 'first' },
-        { label: 'beta', kind: 2 },
-        { label: 'gamma', kind: 2 },
-      ],
-    } as never)
-
-    expect(JSON.parse(output)).toEqual({
-      items: [
-        { label: 'alpha', kind: 'Function', detail: 'first' },
-        { label: 'beta', kind: 'Function' },
-      ],
-      truncated: { shown: 2, total: 3 },
-    })
-  })
-
-  it('keeps the same JSON envelope when output is not truncated', async () => {
-    const { TransformService } = await import('./pipeline')
-    const service = new TransformService()
-    const output = service.formatCompletions({ items: [{ label: 'alpha', kind: 2 }] } as never)
-
-    expect(JSON.parse(output)).toEqual({
-      items: [{ label: 'alpha', kind: 'Function' }],
-    })
   })
 
   it('limits document symbols by recursive node count', async () => {

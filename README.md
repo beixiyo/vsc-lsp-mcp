@@ -56,7 +56,7 @@ This extension bridges that gap, providing AI tools with the same code intellige
 - 🔄 **LSP Bridge**: Converts LSP features into MCP tools
 - 🤖 **VS Code Copilot integration**: Registers the local MCP server directly with VS Code Chat / Copilot
 - 🔌 **Multi-Instance Broker**: One stable MCP endpoint discovers and routes requests across all open VS Code windows
-- 🧠 **15 LSP operations** covering navigation (definition, declaration, type definition, implementation, references), documentation (hover, signature help, completions), structure (document/workspace symbols, call hierarchy), and manipulation (rename)
+- 🧠 **25 LSP operations** covering navigation, diagnostics, document metadata, symbols, call hierarchy, transactional rename, and safe Code Actions
 - ☕ **Java dependency source**: Get decompiled Java class source via jdt:// URI (from jdtls), so AI can read library implementations
 - 📄 **Dual output format**: JSON for machine processing, Markdown for LLM-friendly reading
 
@@ -79,13 +79,23 @@ This extension bridges that gap, providing AI tools with the same code intellige
 | `type_definition` | Get the type definition location of a symbol |
 | `implementation` | Get the implementation location(s) of a symbol |
 | `references` | Find all references to a symbol |
-| `completions` | Get intelligent code completion suggestions |
+| `document_highlight` | Find semantic occurrences of a symbol in the current document |
+| `document_links` | Get navigable document links exposed by the active language extension |
+| `inlay_hints` | Get inferred type and parameter-name hints for a document range |
 | `signature_help` | Get signatures and active-parameter information at a call site |
 | `document_symbols` | Get the symbol outline (tree) of a document |
 | `workspace_symbols` | Search for symbols across the entire workspace by query |
+| `diagnostics` | Get diagnostics for one file with optional severity, source, and code filters |
+| `workspace_diagnostics` | Get filtered diagnostics under a workspace path |
+| `code_actions` | List editable Code Actions at a position |
+| `code_action_preview` | Preview one listed Code Action without side effects |
+| `fix_document_preview` | Preview editable fix-all or quick-fix edits for an entire document |
+| `code_action_apply` | Apply one previously previewed Code Action transaction |
 | `class_file_contents` | Get decompiled Java class source via jdt:// URI (from jdtls), to read library/dependency implementations |
-| `rename` | Rename a symbol across the workspace |
-| `symbol_at_position` | Get symbol metadata (name, kind, range) at a position |
+| `prepare_rename` | Locate and validate a rename candidate |
+| `rename_preview` | Preview a symbol rename without modifying files |
+| `rename_apply` | Apply one previously previewed rename transaction |
+| `prepare_call_hierarchy` | Prepare call hierarchy nodes and return recursive `callId` values |
 | `incoming_calls` | Find all callers of a symbol |
 | `outgoing_calls` | Find all callees (calls made by) a symbol |
 
@@ -94,8 +104,12 @@ All operations are invoked through the single `execute_lsp` MCP tool with a unif
 - `uri` — file path or URI string (supports both plain paths and `file://`/`jdt://` URIs)
 - `line` — line number (**1-based**, matching editor display). Required for position-dependent operations
 - `character` — character offset (**1-based**, matching editor display). Required for position-dependent operations
-- `newName` — required only for `rename`
+- `newName` / `renameId` — used by the three-stage rename flow
+- `actionKind` / `actionId` — filter and continue the Code Action transaction flow
 - `query` — required only for `workspace_symbols`
+- `symbolKinds`, `includeDeclaration`, `includeExternal`, `pathPattern`, `severities`, `sources`, `codes` — optional result filters applied before `maxResults`
+- `startLine`, `endLine` — optional inclusive range for `inlay_hints`
+- `callId` — returned by call hierarchy operations for recursive traversal
 - `instanceId` — optional instance returned by `list_instances`; takes precedence over automatic path routing
 
 > **1-based positions**: Both input and output use 1-based line/character values, matching what your editor displays. VS Code shows `Ln 9, Col 16` → pass `line: 9, character: 16`. Output positions can be used directly as input for the next call — no conversion needed.
@@ -132,8 +146,9 @@ The first multi-instance release supports local desktop workspaces and `file:` r
 | `lsp-mcp.cors.allowOrigins`   | Allowed origins for CORS. Use `*` to allow all origins, or provide a comma-separated list of origins (e.g., `http://localhost:3000,http://localhost:5173`). | `string`  | `*`     |
 | `lsp-mcp.cors.withCredentials` | Whether to allow credentials (cookies, authorization headers) in CORS requests.                                                                       | `boolean` | `false` |
 | `lsp-mcp.cors.exposeHeaders`   | Headers that browsers are allowed to access. Provide a comma-separated list of headers (e.g., `Mcp-Session-Id`).                      | `string`  | `Mcp-Session-Id` |
-| `lsp-mcp.maxResults`           | Maximum number of items returned for list-type results (completions, workspace_symbols, etc.). Prevents excessive token usage. | `number` | `200` |
+| `lsp-mcp.maxResults`           | Maximum number of items returned for list-type results such as `workspace_symbols`. Prevents excessive token usage. | `number` | `200` |
 | `lsp-mcp.outputFormat`         | Output format for LSP operation results. `json` for machine-readable JSON, `markdown` for LLM-friendly Markdown.                     | `string`  | `json` |
+| `lsp-mcp.dependencyMarkers`    | Path substrings used to classify dependency results for sorting and `includeExternal=false`. | `string[]` | language-specific defaults |
  
 <!-- configs -->
 

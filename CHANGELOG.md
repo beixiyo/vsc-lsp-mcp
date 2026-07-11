@@ -4,12 +4,23 @@
 - JSON 列表结果统一使用 `{ items, truncated? }` 顶层结构，不再返回裸数组或裸分组对象
 - 所有 LSP range 从仅行号的 `startLine-endLine` 改为可直接复用的 1-based `line:character-line:character`
 - `workspace_symbols` 不再接受空 query，资源重命名仅允许当前 VS Code 工作区内的本地路径
+- 移除 `completions` operation；补全依赖高度精确的编辑上下文，不再作为面向 AI 的 MCP 能力暴露
+- 将单步 `rename` 改为 `prepare_rename -> rename_preview -> rename_apply` 事务，写入前必须先预览
+- 将 `symbol_at_position` 替换为 `prepare_call_hierarchy`；`incoming_calls` / `outgoing_calls` 改用短期 `callId` 递归遍历
 
 ### Added
 - 新增独立多实例 Broker，外部 AI 通过一个稳定 MCP 地址发现并调用多个 VS Code 窗口
 - 新增 `health` 与 `list_instances` 工具，`execute_lsp` / `rename_resource` 支持可选 `instanceId`
 - 支持省略 `instanceId` 时按工作区根目录最长路径前缀自动路由，歧义时明确拒绝猜测
 - 新增只读的 `signature_help` 与 `type_definition` operation
+- 新增 `document_highlight`、`document_links` 与 `inlay_hints`，紧凑返回文档语义位置、可导航链接和内联类型提示
+- 新增 `diagnostics` 与 `workspace_diagnostics`，支持按严重级别、来源和诊断代码筛选
+- 新增安全 Code Action 流程：单点使用 `code_actions -> code_action_preview -> code_action_apply`，全文件使用 `fix_document_preview -> code_action_apply`
+- 新增事务式符号重命名：预览完整文本编辑摘要，应用后保存全部目标文档，并拒绝过期、陈旧或重复事务
+- 新增可递归调用层级：prepare 与每层查询均返回短期 `callId`，支持继续展开 incoming/outgoing 调用图
+- `document_symbols` 新增名称 query 与 `symbolKinds` 筛选
+- `references` 新增 `includeDeclaration`、`includeExternal` 与 `pathPattern` 筛选
+- 新增 `lsp-mcp.dependencyMarkers` 配置，用于识别 Node.js、Rust、Go、Java、Python 与 vendor 依赖路径
 
 ### Changed
 - 每个 VS Code 窗口改为仅监听带随机 token 的 loopback 内部端点
@@ -21,11 +32,25 @@
 - 注册目录按当前用户隔离并校验权限，Broker 启动失败时会回滚当前窗口的内部服务
 - 按用户意图重写 `execute_lsp` 描述与参数说明，明确 1-based 坐标、路径规则和立即写入风险
 - 拒绝 0 行/0 列、相对路径、空 `workspace_symbols` query 和无效 Java class URI
-- 主要列表输出受 `lsp-mcp.maxResults` 限制，符号树按节点预算截断并返回 `shown` / `total`，completion 输出同时去重
+- 主要列表输出受 `lsp-mcp.maxResults` 限制，符号树按节点预算截断并返回 `shown` / `total`
+- 所有筛选均在 `maxResults` 截断前执行，`shown` / `total` 反映筛选后的真实结果数量
+- 调用层级按 workspace > dependency > external 排序，同来源内优先展示 Function/Constructor，再展示 Method 与其他节点
+- Code Action 仅暴露带纯文本 `WorkspaceEdit` 的操作，不执行 command-only action，也拒绝无法完整预览的文件创建、删除或重命名操作
+- Rename 与 Code Action 使用五分钟单次事务，并在 preview/apply 两个阶段校验目标资源版本，防止陈旧坐标写入
+- MCP 描述按查询、筛选、位置复用、事务安全与递归调用流程重新分类，补充中英文翻译
 - 修复 Windows 盘符路径被误判为 URI scheme 的问题
+
+### Fixed
+- 修复语言服务器支持 rename、但未实现可选 `prepareRename` 时被错误判定为不可重命名的问题
+- 修复跨文件 Rename / Code Action 只修改 VS Code buffer、未可靠保存全部目标文档的问题
+- 修复 Code Action 在 list、preview 与 apply 之间目标文件变化时仍可能应用陈旧编辑的问题
+- 修复 `document_links` 未请求 resolve 导致惰性链接缺少 target 的问题
+- 修复空 `severities`、`sources`、`codes` 或 `symbolKinds` 数组被误解为“匹配零项”的问题
+- 修复调用层级被 TypeScript 标准库方法占满前几项、工作区函数在截断前不可见的问题
 
 ### Removed
 - 移除不再适用于固定 Broker 地址的 `lsp-mcp.maxRetries` 配置
+- 移除 completion 实现、转换器、协议字段与相关文档
 
 ## [0.2.2] - 2026-07-02
 

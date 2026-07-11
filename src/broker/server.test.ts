@@ -53,7 +53,7 @@ describe('multi-instance broker', () => {
     const tools = await client.listTools()
     const executeLsp = tools.tools.find(tool => tool.name === 'execute_lsp')
     expect(executeLsp?.description).toContain('CHOOSE BY INTENT')
-    expect(executeLsp?.description).toContain('rename immediately applies')
+    expect(executeLsp?.description).toContain('prepare_rename -> rename_preview(newName) -> rename_apply(renameId)')
     expect(executeLsp?.inputSchema.properties).toMatchObject({
       line: { minimum: 1 },
       character: { minimum: 1 },

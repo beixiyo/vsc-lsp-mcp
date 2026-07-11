@@ -10,10 +10,6 @@ export class JsonFormatter implements Formatter {
     return list(items)
   }
 
-  formatCompletions(items: Record<string, any>[]): string {
-    return list(items)
-  }
-
   formatLocations(locations: Record<string, any>[], _label?: string): string {
     const grouped: Record<string, Record<string, any>[]> = {}
     for (const loc of locations) {
@@ -24,7 +20,43 @@ export class JsonFormatter implements Formatter {
     return list(grouped)
   }
 
-  formatRename(result: Record<string, any>): string {
+  formatDiagnostics(items: Record<string, any>[], _workspace: boolean): string {
+    return list(groupByFile(items))
+  }
+
+  formatDocumentHighlights(items: Record<string, any>[]): string {
+    return list(items)
+  }
+
+  formatDocumentLinks(items: Record<string, any>[]): string {
+    return list(items)
+  }
+
+  formatInlayHints(items: Record<string, any>[]): string {
+    return list(items)
+  }
+
+  formatCodeActions(items: Record<string, any>[]): string {
+    return list(items)
+  }
+
+  formatCodeActionPreview(result: Record<string, any>, _documentFix?: boolean): string {
+    return JSON.stringify(result)
+  }
+
+  formatCodeActionApplied(result: Record<string, any>): string {
+    return JSON.stringify(result)
+  }
+
+  formatPrepareRename(result: Record<string, any>): string {
+    return JSON.stringify(result)
+  }
+
+  formatRenamePreview(result: Record<string, any>): string {
+    return JSON.stringify(result)
+  }
+
+  formatRenameApplied(result: Record<string, any>): string {
     return JSON.stringify(result)
   }
 

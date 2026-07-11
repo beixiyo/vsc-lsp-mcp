@@ -89,6 +89,25 @@
           ],
           "description": "%lsp-mcp.configuration.outputFormat.description%"
         },
+        "lsp-mcp.dependencyMarkers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "/node_modules/",
+            "/.pnpm/",
+            "/.cargo/registry/",
+            "/rustlib/",
+            "/go/pkg/mod/",
+            "/.m2/repository/",
+            "/.gradle/caches/",
+            "/.venv/",
+            "/site-packages/",
+            "/vendor/"
+          ],
+          "description": "%lsp-mcp.configuration.dependencyMarkers.description%"
+        },
         "lsp-mcp.mcpLocale": {
           "type": "string",
           "default": "none",

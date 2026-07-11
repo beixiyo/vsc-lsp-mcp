@@ -1,7 +1,6 @@
 import { hasUriScheme, isFileUri, isNativeAbsolutePath } from './pathInput'
 
 export const lspOperations = [
-  'completions',
   'signature_help',
   'definition',
   'declaration',
@@ -9,14 +8,56 @@ export const lspOperations = [
   'implementation',
   'hover',
   'references',
+  'document_highlight',
+  'document_links',
+  'inlay_hints',
   'document_symbols',
   'workspace_symbols',
+  'diagnostics',
+  'workspace_diagnostics',
+  'code_actions',
+  'code_action_preview',
+  'fix_document_preview',
+  'code_action_apply',
   'class_file_contents',
-  'rename',
-  'symbol_at_position',
+  'prepare_rename',
+  'rename_preview',
+  'rename_apply',
+  'prepare_call_hierarchy',
   'incoming_calls',
   'outgoing_calls',
 ] as const
+
+export const symbolKindFilters = [
+  'file',
+  'module',
+  'namespace',
+  'package',
+  'class',
+  'method',
+  'property',
+  'field',
+  'constructor',
+  'enum',
+  'interface',
+  'function',
+  'variable',
+  'constant',
+  'string',
+  'number',
+  'boolean',
+  'array',
+  'object',
+  'key',
+  'null',
+  'enum_member',
+  'struct',
+  'event',
+  'operator',
+  'type_parameter',
+] as const
+
+export const diagnosticSeverityFilters = ['error', 'warning', 'information', 'hint'] as const
 
 export const lspToolIntroduction = 'Execute an LSP operation through the matching VS Code instance.'
 
@@ -30,25 +71,34 @@ export const operationIntentDescription = `CHOOSE BY INTENT
 No position required:
 - document_symbols: outline symbols in one file.
 - workspace_symbols: search project symbols; query is required and must not be empty.
+- diagnostics: diagnostics for one file; optional severities, sources, and codes filters.
+- workspace_diagnostics: diagnostics under a workspace path; optional severities, sources, and codes filters.
+- code_action_preview: inspect one actionId returned by code_actions without modifying files.
+- fix_document_preview: preview editable source.fixAll or quick-fix edits for the whole document.
+- document_links: navigable targets in one document.
+- inlay_hints: inferred types and parameter-name hints; optionally accepts startLine and endLine.
 - class_file_contents: get Java/JDT decompiled source; requires an existing jdt:// URI and may be unavailable without a Java extension.
 
 Symbol position required:
 - hover: signature and documentation.
 - definition, declaration, type_definition, implementation: navigation locations.
 - references: project references grouped by file.
-- rename: rename a symbol across the workspace; newName is required.
+- document_highlight: semantic occurrences in the current document.
+- code_actions: list editable actions at a position; optional actionKind filters the provider request.
+- prepare_rename: validate a symbol and return its range and placeholder.
+- rename_preview: create a no-side-effect WorkspaceEdit preview; newName is required.
 
 Call-site position required:
-- completions: suggestions at the cursor or expression position.
 - signature_help: pass a position inside the intended call argument.
 
 Call hierarchy:
-- symbol_at_position: prepare the hierarchy item at a symbol position.
-- incoming_calls, outgoing_calls: prepare at the supplied symbol position, then return callers or callees. Reuse namePosition from document_symbols or a previous call-hierarchy result.`
+- prepare_call_hierarchy: prepare nodes at a symbol position and return callId values.
+- incoming_calls, outgoing_calls: query one graph layer by callId; returned nodes include new callId values for recursive traversal.`
 
 export const lspSafetyDescription = `READ AND WRITE SAFETY
-- All operations are read-only except rename.
-- rename immediately applies a VS Code WorkspaceEdit. It has no preview, transaction ID, stale check, rollback guarantee, or explicit save-to-disk guarantee. Inspect symbols/references first and use it only when immediate workspace modification is intended.
+- All operations are read-only except rename_apply and code_action_apply.
+- Rename: prepare_rename -> rename_preview(newName) -> rename_apply(renameId). Preview never modifies files; apply rejects expired, stale, or reused transactions and saves affected documents.
+- Code actions: code_actions -> code_action_preview(actionId) -> code_action_apply(actionId). For a whole file use fix_document_preview -> code_action_apply(actionId). Command-only actions are never executed.
 - rename_resource is a separate tool and also modifies the workspace immediately.
 - Primary list results are compact and limited by the lsp-mcp.maxResults setting. Truncated output reports shown and total. Nested metadata is not counted unless stated otherwise.`
 
@@ -62,7 +112,6 @@ export const specialUriDescription = 'Existing special URIs may be passed unchan
 export const immediateWriteWarning = 'This operation immediately modifies the workspace and has no preview or rollback guarantee.'
 
 const positionOperations = new Set<LspOperation>([
-  'completions',
   'signature_help',
   'definition',
   'declaration',
@@ -70,10 +119,11 @@ const positionOperations = new Set<LspOperation>([
   'implementation',
   'hover',
   'references',
-  'rename',
-  'symbol_at_position',
-  'incoming_calls',
-  'outgoing_calls',
+  'document_highlight',
+  'prepare_rename',
+  'rename_preview',
+  'prepare_call_hierarchy',
+  'code_actions',
 ])
 
 /** 校验 Broker 与内部 Instance Server 共用的 LSP 输入契约 */
@@ -91,11 +141,32 @@ export function validateExecuteLspInput(input: ExecuteLspInput): void {
   if (input.operation === 'workspace_symbols' && !input.query?.trim())
     throw new Error('"workspace_symbols" requires a non-empty "query" parameter')
 
-  if (input.operation === 'rename' && !input.newName?.trim())
-    throw new Error('"rename" requires a non-empty "newName" parameter')
+  if (input.operation === 'rename_preview' && !input.newName?.trim())
+    throw new Error('"rename_preview" requires a non-empty "newName" parameter')
+
+  if (input.operation === 'rename_apply' && !input.renameId?.trim())
+    throw new Error('"rename_apply" requires a non-empty "renameId" parameter')
+
+  if (input.operation === 'code_action_preview' && !input.actionId?.trim())
+    throw new Error('"code_action_preview" requires a non-empty "actionId" parameter')
+
+  if (input.operation === 'code_action_apply' && !input.actionId?.trim())
+    throw new Error('"code_action_apply" requires a non-empty "actionId" parameter')
+
+  if ((input.operation === 'incoming_calls' || input.operation === 'outgoing_calls') && !input.callId?.trim())
+    throw new Error(`"${input.operation}" requires a non-empty "callId" parameter`)
 
   if (input.operation === 'class_file_contents' && !/^jdt:\/\//i.test(input.uri))
     throw new Error('"class_file_contents" requires an existing jdt:// URI')
+
+  if (input.operation === 'inlay_hints') {
+    if (input.startLine != null && (!Number.isInteger(input.startLine) || input.startLine < 1))
+      throw new Error('"startLine" must be a 1-based positive integer')
+    if (input.endLine != null && (!Number.isInteger(input.endLine) || input.endLine < 1))
+      throw new Error('"endLine" must be a 1-based positive integer')
+    if (input.startLine != null && input.endLine != null && input.startLine > input.endLine)
+      throw new Error('"startLine" must not exceed "endLine"')
+  }
 }
 
 /** 校验资源重命名的路径输入，只允许本地绝对路径与 file URI */
@@ -123,7 +194,23 @@ export interface ExecuteLspInput {
   character?: number
   newName?: string
   query?: string
+  symbolKinds?: SymbolKindFilter[]
+  includeDeclaration?: boolean
+  includeExternal?: boolean
+  pathPattern?: string
+  severities?: DiagnosticSeverityFilter[]
+  sources?: string[]
+  codes?: string[]
+  startLine?: number
+  endLine?: number
+  callId?: string
+  renameId?: string
+  actionId?: string
+  actionKind?: string
 }
+
+export type SymbolKindFilter = typeof symbolKindFilters[number]
+export type DiagnosticSeverityFilter = typeof diagnosticSeverityFilters[number]
 
 /** Broker 转发到 VS Code 实例的资源重命名请求 */
 export interface RenameResourceInput {

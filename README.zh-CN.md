@@ -42,7 +42,7 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 
 ### 🌟 为什么需要这个扩展？
 
-像 Claude 和 Cursor 这样的大型语言模型难以准确理解你的代码库，因为：
+像 Claude 和 Cursor 这些大语言模型难以准确理解你的代码库，因为：
 
 - 它们依赖正则表达式模式查找符号，导致错误匹配
 - 它们无法正确分析导入/导出关系
@@ -56,7 +56,7 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 - 🔄 **LSP 桥接**：将 LSP 功能转换为 MCP 工具
 - 🤖 **VS Code Copilot 集成**：直接将本地 MCP 服务器注册到 VS Code Chat / Copilot
 - 🔌 **多实例 Broker**：通过一个稳定 MCP 入口发现并路由到所有已打开的 VS Code 窗口
-- 🧠 **15 项 LSP 操作**：涵盖代码导航（定义、声明、类型定义、实现、引用）、文档信息（悬停、签名帮助、补全）、结构分析（文档/工作区符号、调用层次）、代码重构（重命名）
+- 🧠 **25 项 LSP 操作**：涵盖代码导航、诊断、文档元数据、符号、调用层级、事务式重命名与安全 Code Action
 - ☕ **Java 依赖源码**：通过 `jdt://` URI 获取 jdtls 反编译的类源码，便于 AI 阅读依赖库实现
 - 📄 **双格式输出**：JSON 用于机器处理，Markdown 用于 LLM 友好阅读
 
@@ -79,13 +79,23 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 | `type_definition` | 获取符号的类型定义位置 |
 | `implementation` | 获取符号的实现位置 |
 | `references` | 查找符号的所有引用位置 |
-| `completions` | 获取智能代码补全建议 |
+| `document_highlight` | 查找当前文档中同一符号的语义出现位置 |
+| `document_links` | 获取语言扩展提供的可导航文档链接 |
+| `inlay_hints` | 获取文档范围内推断的类型与参数名提示 |
 | `signature_help` | 获取调用点的签名与当前参数信息 |
 | `document_symbols` | 获取文档的符号大纲树 |
 | `workspace_symbols` | 按查询词在整个工作区搜索符号 |
+| `diagnostics` | 获取单个文件诊断，可按严重级别、来源和代码筛选 |
+| `workspace_diagnostics` | 获取工作区路径下经过筛选的诊断 |
+| `code_actions` | 列出指定位置可编辑的 Code Action |
+| `code_action_preview` | 无副作用地预览一个 Code Action |
+| `fix_document_preview` | 预览整个文档可编辑的 fix-all 或 quick-fix 编辑 |
+| `code_action_apply` | 应用一个已经预览的 Code Action 事务 |
 | `class_file_contents` | 通过 jdt:// URI 获取反编译的 Java 类源码，用于阅读依赖库实现 |
-| `rename` | 在工作区内重命名符号 |
-| `symbol_at_position` | 获取指定位置的符号元数据（名称、类型、范围） |
+| `prepare_rename` | 定位并验证可重命名符号 |
+| `rename_preview` | 无副作用地预览符号重命名 |
+| `rename_apply` | 应用一个已经预览的重命名事务 |
+| `prepare_call_hierarchy` | 准备调用层级节点并返回可递归使用的 `callId` |
 | `incoming_calls` | 查找所有调用当前符号的位置 |
 | `outgoing_calls` | 查找当前符号调用的所有被调用者 |
 
@@ -94,8 +104,12 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 - `uri` — 文件路径或 URI（支持普通路径和 `file://`/`jdt://` URI）
 - `line` — 行号（**1-based**，与编辑器显示一致）。位置相关操作必填
 - `character` — 列号（**1-based**，与编辑器显示一致）。位置相关操作必填
-- `newName` — 仅 `rename` 操作需要
+- `newName` / `renameId` — 用于三阶段重命名流程
+- `actionKind` / `actionId` — 用于筛选和继续 Code Action 事务流程
 - `query` — 仅 `workspace_symbols` 操作需要
+- `symbolKinds`、`includeDeclaration`、`includeExternal`、`pathPattern`、`severities`、`sources`、`codes` — 可选筛选参数，在 `maxResults` 前生效
+- `startLine`、`endLine` — `inlay_hints` 的可选包含式范围
+- `callId` — 调用层级操作返回，用于递归遍历
 - `instanceId` — 可选，来自 `list_instances`；传入后优先于路径自动路由
 
 > **1-based 位置**：输入和输出都使用 1-based 行列值，与编辑器显示一致。VS Code 显示 `Ln 9, Col 16` → 传 `line: 9, character: 16`。输出中的位置值可直接用于下一次调用，无需任何转换
@@ -132,8 +146,9 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 | `lsp-mcp.cors.allowOrigins`       | 允许的 CORS 源。使用 `*` 允许所有源，或提供逗号分隔的源列表（例如 `http://localhost:3000,http://localhost:5173`） | `string`  | `*`     |
 | `lsp-mcp.cors.withCredentials`    | 是否允许在 CORS 请求中携带凭证（cookie、授权标头）                                         | `boolean` | `false` |
 | `lsp-mcp.cors.exposeHeaders`      | 允许浏览器访问的响应头。提供逗号分隔的头列表（例如 `Mcp-Session-Id`）        | `string`  | `Mcp-Session-Id` |
-| `lsp-mcp.maxResults`           | 列表类结果的最大条目数（completions、workspace_symbols 等），防止 token 溢出 | `number` | `200` |
+| `lsp-mcp.maxResults`           | `workspace_symbols` 等列表类结果的最大条目数，防止 token 溢出 | `number` | `200` |
 | `lsp-mcp.outputFormat`         | LSP 操作结果的输出格式。`json` 为机器可读 JSON，`markdown` 为 LLM 友好的 Markdown                  | `string`  | `json` |
+| `lsp-mcp.dependencyMarkers` | 用于排序和 `includeExternal=false` 的依赖路径识别子串 | `string[]` | 各语言默认值 |
 
 <!-- configs -->
 

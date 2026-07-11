@@ -7,7 +7,8 @@
   "lsp-mcp.configuration.cors.allowOrigins.description": "允许的 CORS 来源。使用 '*' 允许所有来源，或提供逗号分隔的来源列表（例如 'http://localhost:3000,http://localhost:5173'）。",
   "lsp-mcp.configuration.cors.withCredentials.description": "是否允许 CORS 请求携带凭证（cookie、授权标头）。",
   "lsp-mcp.configuration.cors.exposeHeaders.description": "允许浏览器访问的响应头。提供逗号分隔的响应头列表（例如 'Mcp-Session-Id,Content-Type'）。",
-  "lsp-mcp.configuration.maxResults.description": "列表类结果返回的最大条目数（completions、workspace_symbols 等），用于避免过多 token 消耗。",
+  "lsp-mcp.configuration.maxResults.description": "workspace_symbols 等列表类结果返回的最大条目数，用于避免过多 token 消耗。",
   "lsp-mcp.configuration.outputFormat.description": "LSP 操作结果的输出格式。'json' 表示机器可读 JSON，'markdown' 表示对 LLM 友好的 Markdown。",
+  "lsp-mcp.configuration.dependencyMarkers.description": "用于识别第三方依赖目录的路径标记，影响引用过滤与调用层级排序。",
   "lsp-mcp.configuration.mcpLocale.description": "MCP 工具描述和响应的语言。'none' 跟随 VS Code 显示语言。"
 }

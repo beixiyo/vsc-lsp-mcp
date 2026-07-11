@@ -17,14 +17,6 @@ export interface Formatter {
   formatSignatureHelp: (items: Record<string, any>[]) => string
 
   /**
-   * Format completion items
-   *
-   * @param items - Array of flattened completion items ({label, kind?, detail?})
-   * @returns Formatted string
-   */
-  formatCompletions: (items: Record<string, any>[]) => string
-
-  /**
    * Format location results
    *
    * @param locations - Array of flattened locations ({file, range})
@@ -33,13 +25,31 @@ export interface Formatter {
    */
   formatLocations: (locations: Record<string, any>[], label?: string) => string
 
+  formatDiagnostics: (items: Record<string, any>[], workspace: boolean) => string
+
+  formatDocumentHighlights: (items: Record<string, any>[]) => string
+
+  formatDocumentLinks: (items: Record<string, any>[]) => string
+
+  formatInlayHints: (items: Record<string, any>[]) => string
+
+  formatCodeActions: (items: Record<string, any>[]) => string
+
+  formatCodeActionPreview: (result: Record<string, any>, documentFix?: boolean) => string
+
+  formatCodeActionApplied: (result: Record<string, any>) => string
+
   /**
    * Format rename summary
    *
    * @param result - Flattened rename result ({success, newName, filesChanged, totalEdits})
    * @returns Formatted string
    */
-  formatRename: (result: Record<string, any>) => string
+  formatPrepareRename: (result: Record<string, any>) => string
+
+  formatRenamePreview: (result: Record<string, any>) => string
+
+  formatRenameApplied: (result: Record<string, any>) => string
 
   /**
    * Format a workspace resource rename result
