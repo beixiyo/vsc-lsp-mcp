@@ -56,7 +56,7 @@ This extension bridges that gap, providing AI tools with the same code intellige
 - 🔄 **LSP Bridge**: Converts LSP features into MCP tools
 - 🤖 **VS Code Copilot integration**: Registers the local MCP server directly with VS Code Chat / Copilot
 - 🔌 **Multi-Instance Broker**: One stable MCP endpoint discovers and routes requests across all open VS Code windows
-- 🧠 **16 LSP operations** covering navigation (definition, declaration, implementation, references), documentation (hover, completions), structure (document/workspace symbols, call hierarchy), and manipulation (rename)
+- 🧠 **15 LSP operations** covering navigation (definition, declaration, type definition, implementation, references), documentation (hover, signature help, completions), structure (document/workspace symbols, call hierarchy), and manipulation (rename)
 - ☕ **Java dependency source**: Get decompiled Java class source via jdt:// URI (from jdtls), so AI can read library implementations
 - 📄 **Dual output format**: JSON for machine processing, Markdown for LLM-friendly reading
 
@@ -76,9 +76,11 @@ This extension bridges that gap, providing AI tools with the same code intellige
 | `hover` | Get hover information (documentation, type, etc.) at a position |
 | `definition` | Get the definition location of a symbol |
 | `declaration` | Get the declaration location of a symbol |
+| `type_definition` | Get the type definition location of a symbol |
 | `implementation` | Get the implementation location(s) of a symbol |
 | `references` | Find all references to a symbol |
 | `completions` | Get intelligent code completion suggestions |
+| `signature_help` | Get signatures and active-parameter information at a call site |
 | `document_symbols` | Get the symbol outline (tree) of a document |
 | `workspace_symbols` | Search for symbols across the entire workspace by query |
 | `class_file_contents` | Get decompiled Java class source via jdt:// URI (from jdtls), to read library/dependency implementations |

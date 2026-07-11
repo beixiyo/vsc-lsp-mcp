@@ -50,18 +50,32 @@ async function acquireLock(path: string): Promise<number | undefined> {
     writeLock(descriptor)
     return descriptor
   }
-  catch {
+  catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'EEXIST')
+      throw error
+
+    await new Promise(resolve => setTimeout(resolve, 25))
+    let lock: BrokerLock
     try {
-      const lock = JSON.parse(readFileSync(path, 'utf8')) as BrokerLock
+      lock = JSON.parse(readFileSync(path, 'utf8')) as BrokerLock
       if (isProcessAlive(lock.pid))
         return undefined
     }
-    catch {}
+    catch {
+      return undefined
+    }
 
     rmSync(path, { force: true })
-    const descriptor = openSync(path, 'wx', PRIVATE_FILE_MODE)
-    writeLock(descriptor)
-    return descriptor
+    try {
+      const descriptor = openSync(path, 'wx', PRIVATE_FILE_MODE)
+      writeLock(descriptor)
+      return descriptor
+    }
+    catch (retryError) {
+      if ((retryError as NodeJS.ErrnoException).code === 'EEXIST')
+        return undefined
+      throw retryError
+    }
   }
 }
 

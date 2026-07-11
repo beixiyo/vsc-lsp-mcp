@@ -18,16 +18,6 @@ export const kindNames = generateEnumNameMap(vscode.CompletionItemKind)
 export const symbolKindNames = generateEnumNameMap(vscode.SymbolKind)
 
 /**
- * Convert a VSCode Range to a compact 1-based line-only string pair
- *
- * @param range - VSCode Range (0-based internally)
- * @returns string with "startLine-endLine" (1-based, matching editor display)
- */
-function formatRangeLines(range: vscode.Range): string {
-  return `${range.start.line + 1}-${range.end.line + 1}`
-}
-
-/**
  * Convert a VSCode Range to a compact 1-based string pair with character offsets
  * Kept for namePosition and callSites which need character-level precision.
  *
@@ -57,7 +47,7 @@ export function getFile(uri: vscode.Uri): string {
 export function flattenLocation(loc: vscode.Location): Record<string, any> {
   return {
     file: getFile(loc.uri),
-    range: formatRangeLines(loc.range),
+    range: formatRange(loc.range),
   }
 }
 
@@ -70,7 +60,7 @@ export function flattenLocation(loc: vscode.Location): Record<string, any> {
 export function flattenLocationLink(link: vscode.LocationLink): Record<string, any> {
   return {
     file: getFile(link.targetUri),
-    range: formatRangeLines(link.targetRange),
+    range: formatRange(link.targetRange),
   }
 }
 
@@ -132,7 +122,7 @@ export function flattenSymbol(
   }
 
   if ('location' in symbol) {
-    base.range = formatRangeLines(symbol.location.range)
+    base.range = formatRange(symbol.location.range)
     if (symbol.containerName)
       base.containerName = symbol.containerName
   }
@@ -140,7 +130,7 @@ export function flattenSymbol(
   if ('detail' in symbol) {
     if (symbol.detail)
       base.detail = symbol.detail
-    base.range = formatRangeLines(symbol.range)
+    base.range = formatRange(symbol.range)
     base.namePosition = formatRange(symbol.selectionRange).split('-')[0]
   }
 
@@ -279,7 +269,7 @@ export function flattenCallHierarchyItem(item: vscode.CallHierarchyItem): Record
     kind: symbolKindNames[item.kind] ?? 'Unknown',
     detail: item.detail || undefined,
     file: getFile(item.uri),
-    range: formatRangeLines(item.range),
+    range: formatRange(item.range),
     namePosition: formatRange(item.selectionRange).split('-')[0],
   }
 }
@@ -293,7 +283,7 @@ export function flattenCallHierarchyItem(item: vscode.CallHierarchyItem): Record
 export function flattenIncomingCall(call: vscode.CallHierarchyIncomingCall): Record<string, any> {
   return {
     caller: flattenCallHierarchyItem(call.from),
-    callSites: call.fromRanges.map(formatRangeLines),
+    callSites: call.fromRanges.map(formatRange),
   }
 }
 
@@ -306,6 +296,6 @@ export function flattenIncomingCall(call: vscode.CallHierarchyIncomingCall): Rec
 export function flattenOutgoingCall(call: vscode.CallHierarchyOutgoingCall): Record<string, any> {
   return {
     callee: flattenCallHierarchyItem(call.to),
-    callSites: call.fromRanges.map(formatRangeLines),
+    callSites: call.fromRanges.map(formatRange),
   }
 }

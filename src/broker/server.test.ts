@@ -50,6 +50,15 @@ describe('multi-instance broker', () => {
     ))
     disposers.push(() => client.close())
 
+    const tools = await client.listTools()
+    const executeLsp = tools.tools.find(tool => tool.name === 'execute_lsp')
+    expect(executeLsp?.description).toContain('CHOOSE BY INTENT')
+    expect(executeLsp?.description).toContain('rename immediately applies')
+    expect(executeLsp?.inputSchema.properties).toMatchObject({
+      line: { minimum: 1 },
+      character: { minimum: 1 },
+    })
+
     const listed = await client.callTool({ name: 'list_instances', arguments: {} })
     const listedText = textContent(listed.content)
     expect(JSON.parse(listedText).instances).toHaveLength(2)

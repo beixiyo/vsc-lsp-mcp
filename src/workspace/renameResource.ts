@@ -1,4 +1,5 @@
 import * as vscode from 'vscode'
+import { hasUriScheme } from '../pathInput'
 import { logger } from '../utils/logger'
 
 /**
@@ -39,8 +40,9 @@ export async function renameResource(
   }
 }
 
-function resolveResourceUri(input: string): vscode.Uri {
-  return /^[a-z][a-z\d+.-]*:\/\//i.test(input)
+/** 将本地绝对路径或 file URI 转换为 VS Code URI */
+export function resolveResourceUri(input: string): vscode.Uri {
+  return hasUriScheme(input)
     ? vscode.Uri.parse(input)
     : vscode.Uri.file(input)
 }

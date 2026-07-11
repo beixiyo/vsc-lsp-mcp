@@ -1,7 +1,6 @@
 import type { ResourceRenameResult } from '../workspace'
 import type { Formatter } from './types'
 import * as vscode from 'vscode'
-import { tMcp } from '../i18n'
 import {
   extractContentText,
   flattenCallHierarchyItem,
@@ -61,27 +60,49 @@ export class TransformService {
     const contents = hovers.map(h =>
       h.contents.map(extractContentText).filter(Boolean).join('\n\n').trim(),
     ).filter(Boolean)
-    return this._getFormatter().formatHover(contents)
+    return this._formatLimited(contents, items => this._getFormatter().formatHover(items))
+  }
+
+  formatSignatureHelp(results: vscode.SignatureHelp[]): string {
+    const items = results.flatMap(result => result.signatures.map((signature, index) => ({
+      label: signature.label,
+      documentation: signature.documentation
+        ? extractContentText(signature.documentation)
+        : undefined,
+      active: index === result.activeSignature,
+      activeParameter: index === result.activeSignature
+        && (signature.activeParameter ?? result.activeParameter) != null
+        ? (signature.activeParameter ?? result.activeParameter)! + 1
+        : undefined,
+      parameters: signature.parameters?.map(parameter => ({
+        label: typeof parameter.label === 'string'
+          ? parameter.label
+          : signature.label.slice(parameter.label[0], parameter.label[1]),
+        documentation: parameter.documentation
+          ? extractContentText(parameter.documentation)
+          : undefined,
+      })),
+    })))
+    return this._formatLimited(items, limited => this._getFormatter().formatSignatureHelp(limited))
   }
 
   formatCompletions(list: vscode.CompletionList): string {
-    const { maxResults } = this._getConfig()
-    const total = list.items.length
-    const items = list.items.slice(0, maxResults).map(item => ({
-      label: flattenLabel(item.label),
-      kind: item.kind !== undefined ? (kindNames[item.kind] ?? 'Unknown') : undefined,
-      detail: item.detail || undefined,
-    }))
-
-    const result = this._getFormatter().formatCompletions(items)
-    if (total > maxResults) {
-      return `${result}\n\n${tMcp('(Showing {maxResults} of {total} items)', { maxResults, total })}`
+    const unique = new Map<string, Record<string, any>>()
+    for (const item of list.items) {
+      const flattened = {
+        label: flattenLabel(item.label),
+        kind: item.kind !== undefined ? (kindNames[item.kind] ?? 'Unknown') : undefined,
+        detail: item.detail || undefined,
+      }
+      const key = `${flattened.label}\0${flattened.kind ?? ''}\0${flattened.detail ?? ''}`
+      if (!unique.has(key))
+        unique.set(key, flattened)
     }
-    return result
+    return this._formatLimited([...unique.values()], items => this._getFormatter().formatCompletions(items))
   }
 
   formatLocations(locations: vscode.Location[], label?: string): string {
-    return this._getFormatter().formatLocations(locations.map(flattenLocation), label)
+    return this._formatLimited(locations.map(flattenLocation), items => this._getFormatter().formatLocations(items, label))
   }
 
   formatLocationsOrLinks(
@@ -92,15 +113,12 @@ export class TransformService {
       if (items.length === 0)
         return this._getFormatter().formatLocations([], label)
       if ('targetUri' in items[0]) {
-        return this._getFormatter().formatLocations(
+        return this._formatLimited(
           (items as vscode.LocationLink[]).map(flattenLocationLink),
-          label,
+          limited => this._getFormatter().formatLocations(limited, label),
         )
       }
-      return this._getFormatter().formatLocations(
-        (items as vscode.Location[]).map(flattenLocation),
-        label,
-      )
+      return this.formatLocations(items as vscode.Location[], label)
     }
     return this._getFormatter().formatLocations([flattenLocation(items)], label)
   }
@@ -132,31 +150,62 @@ export class TransformService {
   formatDocumentSymbols(
     symbols: (vscode.DocumentSymbol | vscode.SymbolInformation)[],
   ): string {
-    return this._getFormatter().formatDocumentSymbols(symbols.map(sym => flattenSymbol(sym, true)))
+    const flattened = symbols.map(sym => flattenSymbol(sym, true))
+    const total = countSymbolNodes(flattened)
+    const { maxResults } = this._getConfig()
+    const items = limitSymbolNodes(flattened, maxResults)
+    const result = this._getFormatter().formatDocumentSymbols(items)
+    return total > maxResults
+      ? this._getFormatter().formatTruncation(result, maxResults, total)
+      : result
   }
 
   async formatWorkspaceSymbols(symbols: vscode.SymbolInformation[]): Promise<string> {
-    const { maxResults } = this._getConfig()
     const allItems = await flattenWorkspaceSymbols(symbols)
-    const total = allItems.length
-    const items = allItems.slice(0, maxResults)
+    return this._formatLimited(allItems, items => this._getFormatter().formatWorkspaceSymbols(items))
+  }
 
-    const result = this._getFormatter().formatWorkspaceSymbols(items)
-    if (total > maxResults) {
-      return `${result}\n\n${tMcp('(Showing {maxResults} of {total} symbols)', { maxResults, total })}`
+  formatCallHierarchyItems(items: vscode.CallHierarchyItem[]): string {
+    return this._formatLimited(items.map(flattenCallHierarchyItem), limited => this._getFormatter().formatCallHierarchyItems(limited))
+  }
+
+  formatIncomingCalls(calls: vscode.CallHierarchyIncomingCall[]): string {
+    return this._formatLimited(calls.map(flattenIncomingCall), limited => this._getFormatter().formatIncomingCalls(limited))
+  }
+
+  formatOutgoingCalls(calls: vscode.CallHierarchyOutgoingCall[]): string {
+    return this._formatLimited(calls.map(flattenOutgoingCall), limited => this._getFormatter().formatOutgoingCalls(limited))
+  }
+
+  private _formatLimited<T>(items: T[], format: (items: T[]) => string): string {
+    const { maxResults } = this._getConfig()
+    const limited = items.slice(0, maxResults)
+    const result = format(limited)
+    return items.length > maxResults
+      ? this._getFormatter().formatTruncation(result, limited.length, items.length)
+      : result
+  }
+}
+
+function countSymbolNodes(symbols: Record<string, any>[]): number {
+  return symbols.reduce((total, symbol) =>
+    total + 1 + countSymbolNodes(symbol.children ?? []), 0)
+}
+
+function limitSymbolNodes(symbols: Record<string, any>[], limit: number): Record<string, any>[] {
+  let remaining = limit
+
+  function visit(items: Record<string, any>[]): Record<string, any>[] {
+    const result: Record<string, any>[] = []
+    for (const item of items) {
+      if (remaining === 0)
+        break
+      remaining--
+      const children = visit(item.children ?? [])
+      result.push(children.length > 0 ? { ...item, children } : { ...item, children: undefined })
     }
     return result
   }
 
-  formatCallHierarchyItems(items: vscode.CallHierarchyItem[]): string {
-    return this._getFormatter().formatCallHierarchyItems(items.map(flattenCallHierarchyItem))
-  }
-
-  formatIncomingCalls(calls: vscode.CallHierarchyIncomingCall[]): string {
-    return this._getFormatter().formatIncomingCalls(calls.map(flattenIncomingCall))
-  }
-
-  formatOutgoingCalls(calls: vscode.CallHierarchyOutgoingCall[]): string {
-    return this._getFormatter().formatOutgoingCalls(calls.map(flattenOutgoingCall))
-  }
+  return visit(symbols)
 }

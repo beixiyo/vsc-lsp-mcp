@@ -56,7 +56,7 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 - 🔄 **LSP 桥接**：将 LSP 功能转换为 MCP 工具
 - 🤖 **VS Code Copilot 集成**：直接将本地 MCP 服务器注册到 VS Code Chat / Copilot
 - 🔌 **多实例 Broker**：通过一个稳定 MCP 入口发现并路由到所有已打开的 VS Code 窗口
-- 🧠 **16 项 LSP 操作**：涵盖代码导航（定义、声明、实现、引用）、文档信息（悬停、补全）、结构分析（文档/工作区符号、调用层次）、代码重构（重命名）
+- 🧠 **15 项 LSP 操作**：涵盖代码导航（定义、声明、类型定义、实现、引用）、文档信息（悬停、签名帮助、补全）、结构分析（文档/工作区符号、调用层次）、代码重构（重命名）
 - ☕ **Java 依赖源码**：通过 `jdt://` URI 获取 jdtls 反编译的类源码，便于 AI 阅读依赖库实现
 - 📄 **双格式输出**：JSON 用于机器处理，Markdown 用于 LLM 友好阅读
 
@@ -76,9 +76,11 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 | `hover` | 获取指定位置的悬停信息（文档、类型等） |
 | `definition` | 获取符号的定义位置 |
 | `declaration` | 获取符号的声明位置 |
+| `type_definition` | 获取符号的类型定义位置 |
 | `implementation` | 获取符号的实现位置 |
 | `references` | 查找符号的所有引用位置 |
 | `completions` | 获取智能代码补全建议 |
+| `signature_help` | 获取调用点的签名与当前参数信息 |
 | `document_symbols` | 获取文档的符号大纲树 |
 | `workspace_symbols` | 按查询词在整个工作区搜索符号 |
 | `class_file_contents` | 通过 jdt:// URI 获取反编译的 Java 类源码，用于阅读依赖库实现 |

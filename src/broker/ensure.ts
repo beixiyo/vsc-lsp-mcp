@@ -19,7 +19,26 @@ export async function ensureBroker(
     return activePort
 
   const brokerPath = context.asAbsolutePath('dist/broker.js')
-  const child = spawn(process.execPath, [brokerPath], {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const activePort = await activeBrokerPort(registryRoot)
+    if (activePort != null)
+      return activePort
+
+    spawnBroker(brokerPath, registryRoot, options)
+    const deadline = Date.now() + BROKER_START_TIMEOUT_MS
+    while (Date.now() < deadline) {
+      const port = await activeBrokerPort(registryRoot)
+      if (port != null)
+        return port
+      await new Promise(resolve => setTimeout(resolve, 50))
+    }
+  }
+
+  throw new Error('Timed out waiting for the LSP MCP broker to start')
+}
+
+function spawnBroker(path: string, registryRoot: string, options: BrokerLaunchOptions): void {
+  const child = spawn(process.execPath, [path], {
     detached: true,
     stdio: 'ignore',
     env: {
@@ -35,16 +54,6 @@ export async function ensureBroker(
     },
   })
   child.unref()
-
-  const deadline = Date.now() + BROKER_START_TIMEOUT_MS
-  while (Date.now() < deadline) {
-    const port = await activeBrokerPort(registryRoot)
-    if (port != null)
-      return port
-    await new Promise(resolve => setTimeout(resolve, 50))
-  }
-
-  throw new Error('Timed out waiting for the LSP MCP broker to start')
 }
 
 /** 启动共享 Broker 所需的运行参数 */

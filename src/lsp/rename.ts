@@ -52,7 +52,9 @@ export async function rename(
       throw new Error('Rename returned no changes')
     }
 
-    await vscode.workspace.applyEdit(edit)
+    const applied = await vscode.workspace.applyEdit(edit)
+    if (!applied)
+      throw new Error('Rename edit could not be applied')
 
     return edit
   }

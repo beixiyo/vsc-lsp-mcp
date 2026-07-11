@@ -1,26 +1,11 @@
 {
   "Execute LSP Operation": "执行 LSP 操作",
-
-  "Execute an LSP operation.\n\nIMPORTANT — All positions are 1-based:\n- Input: line & character use 1-based indexing (matching editor display). VS Code shows \"Ln 9, Col 16\" → pass line=9, character=16.\n- Output: all line/character values in results are also 1-based. You can directly use output positions (e.g. namePosition \"9:16\") as input for the next call (line=9, character=16) — no conversion needed.\n\nOperations requiring line & character:\n- hover: Get hover documentation (signature, JSDoc) at position. Returns: formatted documentation text.\n- definition: Jump to symbol definition. Returns: file path + line range.\n- declaration: Jump to symbol declaration (e.g. TypeScript .d.ts). Returns: file path + line range.\n- implementation: Jump to implementation (for interfaces/abstract classes). Returns: file path + line range.\n- references: Find all references of symbol. Returns: list of file paths + line ranges.\n- completions: Code completions at position. Returns: up to 50 completion items with kind and detail.\n- rename: Rename symbol across workspace. Requires newName. Returns: summary of files and edits changed.\n- symbol_at_position: Get symbol metadata (name, kind, range, namePosition). Returns: call hierarchy item.\n- incoming_calls: Find all callers of the function at position. Returns: caller list with namePosition for chaining.\n- outgoing_calls: Find all callees of the function at position. Returns: callee list with namePosition for chaining.\n\nOperations that do NOT need line/character:\n- document_symbols: Get symbol outline of the file (only needs uri). Returns: hierarchical symbol tree.\n- workspace_symbols: Search symbols across workspace by query (empty query returns all symbols, truncated by maxResults setting). Returns: matching symbols grouped by file.\n- class_file_contents: Get decompiled Java class source via jdt:// URI (only needs uri). Returns: Java source code.": "执行 LSP 操作。\n\n重要提示 — 所有位置均从 1 开始计数：\n- 输入：行号和字符偏移使用 1-based 索引（与编辑器显示一致）。VS Code 显示 \"Ln 9, Col 16\" → 传入 line=9, character=16。\n- 输出：结果中的所有行号/字符偏移值也是 1-based。你可以直接将输出中的位置（如 namePosition \"9:16\"）作为下一次调用的输入（line=9, character=16），无需转换。\n\n需要行号和字符偏移的操作：\n- hover: 获取指定位置的悬停文档（签名、JSDoc）。返回：格式化的文档文本。\n- definition: 跳转到符号定义。返回：文件路径 + 行范围。\n- declaration: 跳转到符号声明（如 TypeScript .d.ts）。返回：文件路径 + 行范围。\n- implementation: 跳转到实现（用于接口/抽象类）。返回：文件路径 + 行范围。\n- references: 查找符号的所有引用。返回：文件路径 + 行范围列表。\n- completions: 指定位置的代码补全。返回：最多 50 个补全项，包含类型和详情。\n- rename: 在工作区中重命名符号。需要 newName 参数。返回：修改的文件和编辑汇总。\n- symbol_at_position: 获取符号元数据（名称、类型、范围、namePosition）。返回：调用层级项。\n- incoming_calls: 查找指定位置函数的所有调用者。返回：调用者列表，包含用于链式调用的 namePosition。\n- outgoing_calls: 查找指定位置函数的所有被调用者。返回：被调用者列表，包含用于链式调用的 namePosition。\n\n不需要行号和字符偏移的操作：\n- document_symbols: 获取文件的符号大纲（只需要 uri）。返回：层级符号树。\n- workspace_symbols: 通过查询搜索工作区中的符号（空查询返回所有符号，受 maxResults 设置截断）。返回：按文件分组的匹配符号。\n- class_file_contents: 通过 jdt:// URI 获取反编译的 Java 类源码（只需要 uri）。返回：Java 源代码。",
-
-  "URI or absolute file path.\n- Plain path (no scheme): treated as absolute file path on disk, e.g. \"/home/user/file.ts\" or \"C:/path/to/file.ts\". Recommended for all file operations.\n- URI with scheme (e.g. file://, jdt://): parsed directly. Scheme part is case-insensitive, path requires proper percent-encoding. Do NOT construct file:// URIs manually.\n- For \"class_file_contents\": must be a jdt:// URI (scheme \"jdt:\").": "URI 或绝对文件路径。\n- 纯路径（无 scheme）：视为磁盘上的绝对文件路径，例如 \"/home/user/file.ts\" 或 \"C:/path/to/file.ts\"。建议所有文件操作使用此格式。\n- 带 scheme 的 URI（如 file://、jdt://）：直接解析。scheme 部分大小写不敏感，路径需要正确的 percent-encoding。不要手动构造 file:// URI。\n- 对于 \"class_file_contents\"：必须是 jdt:// URI（scheme \"jdt:\"）。",
-
-  "Which LSP operation to execute.": "要执行的 LSP 操作。",
-  "Line number (1-based, as shown in editor). Required for position-dependent operations.": "行号（从 1 开始，与编辑器显示一致）。需要位置的操作必须提供。",
-  "Character offset (1-based, as shown in editor). Required for position-dependent operations.": "字符偏移（从 1 开始，与编辑器显示一致）。需要位置的操作必须提供。",
-  "New symbol name. Required only for \"rename\".": "新符号名称。仅在 \"rename\" 时需要。",
-  "Search query. Required only for \"workspace_symbols\".": "搜索查询。仅在 \"workspace_symbols\" 时需要。",
   "Report the global VS Code LSP MCP broker status.": "查看全局 VS Code LSP MCP Broker 状态。",
   "List active VS Code workspace instances. Use instanceId to select one explicitly.": "列出活动的 VS Code 工作区实例。使用 instanceId 显式选择实例。",
   "Pass instanceId when multiple VS Code instances cover the same project.": "多个 VS Code 实例覆盖同一项目时请传入 instanceId。",
   "Exact instance ID returned by list_instances. Optional when the path matches one instance.": "list_instances 返回的精确实例 ID。路径只匹配一个实例时可省略。",
-
   "Rename Workspace Resource": "重命名工作区资源",
-  "Rename a file or directory through VS Code. Language extensions can update affected references during the operation.": "通过 VS Code 重命名文件或目录。语言扩展可在操作期间更新受影响的引用。",
-  "Source absolute file system path or URI.\n- Plain paths are converted with VS Code's Uri.file().\n- URI values retain their scheme, including remote workspace schemes.": "源文件系统绝对路径或 URI。\n- 纯路径通过 VS Code 的 Uri.file() 转换。\n- URI 保留其 scheme，包括远程工作区 scheme。",
-  "Destination absolute file system path or URI.\n- Plain paths are converted with VS Code's Uri.file().\n- URI values retain their scheme, including remote workspace schemes.": "目标文件系统绝对路径或 URI。\n- 纯路径通过 VS Code 的 Uri.file() 转换。\n- URI 保留其 scheme，包括远程工作区 scheme。",
   "Whether an existing destination may be replaced. Defaults to false.": "是否允许替换已存在的目标。默认为 false。",
-
   "No hover information available.": "没有可用的悬停信息。",
   "No completions available.": "没有可用的补全项。",
   "No {label} found.": "未找到 {label}。",
@@ -30,13 +15,25 @@
   "No items found.": "未找到项目。",
   "No incoming calls found.": "未找到调用者。",
   "No outgoing calls found or operation not supported.": "未找到被调用者或操作不支持。",
-
-  "(Showing {maxResults} of {total} items)": "（显示 {total} 项中的前 {maxResults} 项）",
-  "(Showing {maxResults} of {total} symbols)": "（显示 {total} 个符号中的前 {maxResults} 个）",
-
   "line {range}": "行 {range}",
   "name at {pos}": "名称位置 {pos}",
   "detail: {detail}": "详情：{detail}",
   "nested in `{containerName}`": "嵌套于 `{containerName}`",
-  "called at: {sites}": "调用位置：{sites}"
+  "called at: {sites}": "调用位置：{sites}",
+  "Operation selected by intent. See the tool description for position and safety requirements.": "按意图选择 operation；位置和安全要求见工具描述。",
+  "1-based line. Required only for position-based operations. Reuse a returned range start or namePosition; do not guess.": "从 1 开始的行号。仅位置操作需要；复用返回范围的起点或 namePosition，不要猜测。",
+  "1-based character. Required only for position-based operations. For signature_help, use a position inside the intended call argument.": "从 1 开始的字符位置。仅位置操作需要；signature_help 应使用目标调用参数内部的位置。",
+  "Non-empty new symbol name. Required only for rename, which immediately modifies the workspace.": "非空的新符号名。仅 rename 需要，且会立即修改工作区。",
+  "Non-empty project symbol query. Required only for workspace_symbols; empty project-wide searches are rejected.": "非空的项目符号查询。仅 workspace_symbols 需要；空的全项目搜索会被拒绝。",
+  "No signature help available.": "没有可用的签名帮助。",
+  "active parameter: {parameter}": "当前参数：{parameter}",
+  "Execute an LSP operation through the matching VS Code instance.": "通过匹配的 VS Code 实例执行 LSP 操作。",
+  "PATHS AND POSITIONS\n- Pass a native absolute path. Unix: /home/user/file.ts. Windows: C:/work/file.ts.\n- Plain paths are recommended; do not manually construct file:// URIs. Existing special URIs may be passed unchanged.\n- Input and output positions are 1-based. Output range or namePosition `45:17-45:32` can be reused as line=45, character=17.\n- Do not guess symbol positions. For a known file, call document_symbols first. For a project search, call workspace_symbols with a non-empty query, then reuse the returned range start or namePosition.": "路径与位置\n- 使用原生绝对路径。Unix：/home/user/file.ts。Windows：C:/work/file.ts。\n- 推荐普通路径，不要手动构造 file:// URI；已有特殊 URI 可原样传入。\n- 输入和输出位置均从 1 开始，返回的 range 或 namePosition 可直接复用。\n- 不要猜测符号位置：已知文件先调用 document_symbols，项目搜索调用带非空 query 的 workspace_symbols。",
+  "CHOOSE BY INTENT\nNo position required:\n- document_symbols: outline symbols in one file.\n- workspace_symbols: search project symbols; query is required and must not be empty.\n- class_file_contents: get Java/JDT decompiled source; requires an existing jdt:// URI and may be unavailable without a Java extension.\n\nSymbol position required:\n- hover: signature and documentation.\n- definition, declaration, type_definition, implementation: navigation locations.\n- references: project references grouped by file.\n- rename: rename a symbol across the workspace; newName is required.\n\nCall-site position required:\n- completions: suggestions at the cursor or expression position.\n- signature_help: pass a position inside the intended call argument.\n\nCall hierarchy:\n- symbol_at_position: prepare the hierarchy item at a symbol position.\n- incoming_calls, outgoing_calls: prepare at the supplied symbol position, then return callers or callees. Reuse namePosition from document_symbols or a previous call-hierarchy result.": "按意图选择\n无需位置：\n- document_symbols：获取单个文件的符号大纲。\n- workspace_symbols：搜索项目符号；必须提供非空 query。\n- class_file_contents：获取 Java/JDT 反编译源码；必须使用已有的 jdt:// URI，且未安装 Java 扩展时可能不可用。\n\n需要符号位置：\n- hover：获取签名和文档。\n- definition、declaration、type_definition、implementation：获取导航位置。\n- references：按文件分组获取项目引用。\n- rename：在工作区中重命名符号；必须提供 newName。\n\n需要调用点位置：\n- completions：获取光标或表达式位置的补全建议。\n- signature_help：位置必须位于目标调用参数内部。\n\n调用层级：\n- symbol_at_position：在符号位置准备调用层级项。\n- incoming_calls、outgoing_calls：在给定符号位置准备后返回调用者或被调用者。复用 document_symbols 或上一次调用层级结果中的 namePosition。",
+  "Native absolute path or existing URI.\n- Unix path example: /home/user/file.ts.\n- Windows path example: C:/work/file.ts; backslashes are also accepted.\n- Plain absolute paths are recommended and converted with VS Code Uri.file(). Do not manually construct file:// URIs.": "原生绝对路径或已有 URI。Unix：/home/user/file.ts。Windows：C:/work/file.ts，也接受反斜杠。推荐普通路径，不要手动构造 file:// URI。",
+  "Existing special URIs may be passed unchanged. class_file_contents specifically requires a jdt:// URI from VS Code Java tooling.": "已有特殊 URI 可原样传入；class_file_contents 需要 VS Code Java 工具提供的 jdt:// URI。",
+  "This operation immediately modifies the workspace and has no preview or rollback guarantee.": "此操作会立即修改工作区，并且没有预览或回滚保证。",
+  "READ AND WRITE SAFETY\n- All operations are read-only except rename.\n- rename immediately applies a VS Code WorkspaceEdit. It has no preview, transaction ID, stale check, rollback guarantee, or explicit save-to-disk guarantee. Inspect symbols/references first and use it only when immediate workspace modification is intended.\n- rename_resource is a separate tool and also modifies the workspace immediately.\n- Primary list results are compact and limited by the lsp-mcp.maxResults setting. Truncated output reports shown and total. Nested metadata is not counted unless stated otherwise.": "读写安全\n- 除 rename 外，所有 operation 均为只读。\n- rename 会立即应用 VS Code WorkspaceEdit。它没有预览、事务 ID、stale 检查、回滚保证或明确的磁盘保存保证。请先检查 symbols/references，并且仅在确实需要立即修改工作区时使用。\n- rename_resource 是独立工具，也会立即修改工作区。\n- 主要列表结果受 lsp-mcp.maxResults 限制；截断时返回 shown 和 total。除非另有说明，嵌套元数据不计入数量。",
+  "(Showing {shown} of {total})": "（显示前 {shown} 项，共 {total} 项）",
+  "Rename a file or directory inside the selected VS Code workspace. Both paths must remain inside its workspace roots. Language extensions may update affected references.": "在所选 VS Code 工作区内重命名文件或目录。源路径和目标路径都必须位于其工作区根目录内；语言扩展可能更新相关引用。"
 }

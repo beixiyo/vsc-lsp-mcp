@@ -28,8 +28,10 @@ describe('tMcp placeholder interpolation', () => {
 
     expect(i18n.tMcp('No symbols found.'))
       .toBe('未找到符号。')
-    expect(i18n.tMcp('(Showing {maxResults} of {total} symbols)', { maxResults: 5, total: 10 }))
-      .toBe('（显示 10 个符号中的前 5 个）')
+    expect(i18n.tMcp('(Showing {shown} of {total})', {
+      shown: 5,
+      total: 10,
+    })).toBe('（显示前 5 项，共 10 项）')
   })
 
   it('falls back to English with interpolation when a key is missing from the bundle', async () => {

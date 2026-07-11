@@ -10,52 +10,34 @@ import {
   getIncomingCalls,
   getOutgoingCalls,
   getReferences,
+  getSignatureHelp,
+  getTypeDefinition,
   getWorkspaceSymbols,
   prepareCallHierarchy,
   rename,
 } from '../lsp'
+import { validateExecuteLspInput } from '../protocol'
 import { transform } from '../transform'
 
-const positionOps = new Set([
-  'completions',
-  'definition',
-  'declaration',
-  'implementation',
-  'hover',
-  'references',
-  'rename',
-  'symbol_at_position',
-  'incoming_calls',
-  'outgoing_calls',
-])
-
 /** 在当前 VS Code 窗口中执行经过 Broker 路由的 LSP 操作 */
-export async function executeLspOperation({
-  operation,
-  uri,
-  line: rawLine,
-  character: rawChar,
-  newName,
-  query,
-}: ExecuteLspInput): Promise<string> {
-  let line = 0
-  let character = 0
+export async function executeLspOperation(input: ExecuteLspInput): Promise<string> {
+  validateExecuteLspInput(input)
 
-  if (positionOps.has(operation)) {
-    if (rawLine == null || rawChar == null)
-      throw new Error(`"${operation}" requires "line" and "character" parameters (1-based)`)
-
-    line = rawLine - 1
-    character = rawChar - 1
-  }
+  const { operation, uri, newName, query } = input
+  const line = (input.line ?? 1) - 1
+  const character = (input.character ?? 1) - 1
 
   switch (operation) {
     case 'completions':
       return transform.formatCompletions(await getCompletions(uri, line, character))
+    case 'signature_help':
+      return transform.formatSignatureHelp(await getSignatureHelp(uri, line, character))
     case 'definition':
       return transform.formatLocationsOrLinks(await getDefinition(uri, line, character), 'Definition')
     case 'declaration':
       return transform.formatLocationsOrLinks(await getDeclarations(uri, line, character), 'Declaration')
+    case 'type_definition':
+      return transform.formatLocationsOrLinks(await getTypeDefinition(uri, line, character), 'Type Definition')
     case 'implementation':
       return transform.formatLocationsOrLinks(await getImplementations(uri, line, character), 'Implementation')
     case 'hover':
@@ -65,14 +47,12 @@ export async function executeLspOperation({
     case 'document_symbols':
       return transform.formatDocumentSymbols(await getDocumentSymbols(uri))
     case 'workspace_symbols':
-      return transform.formatWorkspaceSymbols(await getWorkspaceSymbols(query ?? ''))
+      return transform.formatWorkspaceSymbols(await getWorkspaceSymbols(query!))
     case 'class_file_contents':
       return transform.formatClassFile(await getClassFileContents(uri))
     case 'rename': {
-      if (!newName)
-        throw new Error('"rename" requires the "newName" parameter')
-      const edit = await rename(uri, line, character, newName)
-      return transform.formatRename(edit, newName)
+      const edit = await rename(uri, line, character, newName!)
+      return transform.formatRename(edit, newName!)
     }
     case 'symbol_at_position': {
       const rawItems = await prepareCallHierarchy(uri, line, character)

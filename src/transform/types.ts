@@ -13,6 +13,9 @@ export interface Formatter {
    */
   formatHover: (contents: string[]) => string
 
+  /** Format compact signature-help results. */
+  formatSignatureHelp: (items: Record<string, any>[]) => string
+
   /**
    * Format completion items
    *
@@ -93,4 +96,7 @@ export interface Formatter {
    * @returns Formatted string
    */
   formatOutgoingCalls: (calls: Record<string, any>[]) => string
+
+  /** Attach a machine-readable or human-readable truncation summary. */
+  formatTruncation: (result: string, shown: number, total: number) => string
 }

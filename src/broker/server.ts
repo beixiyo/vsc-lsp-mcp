@@ -45,7 +45,8 @@ export async function startBroker(options: BrokerOptions): Promise<BrokerHandle>
         onsessioninitialized: (initializedId) => {
           transports.set(initializedId, transport!)
         },
-        allowedHosts: ['127.0.0.1', 'localhost'],
+        allowedHosts: [`127.0.0.1:${port}`, `localhost:${port}`],
+        enableDnsRebindingProtection: true,
       })
       transport.onclose = () => {
         if (transport?.sessionId)

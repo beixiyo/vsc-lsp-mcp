@@ -1,16 +1,17 @@
 import type { Formatter } from './types'
 
-/**
- * JsonFormatter converts flattened LSP data into JSON strings.
- * Items sharing the same file path are grouped together to reduce redundancy.
- */
+/** 将扁平化结果序列化为具有稳定顶层结构的 JSON */
 export class JsonFormatter implements Formatter {
   formatHover(contents: string[]): string {
-    return JSON.stringify(contents)
+    return list(contents)
+  }
+
+  formatSignatureHelp(items: Record<string, any>[]): string {
+    return list(items)
   }
 
   formatCompletions(items: Record<string, any>[]): string {
-    return JSON.stringify(items)
+    return list(items)
   }
 
   formatLocations(locations: Record<string, any>[], _label?: string): string {
@@ -20,7 +21,7 @@ export class JsonFormatter implements Formatter {
         grouped[loc.file] = []
       grouped[loc.file].push({ range: loc.range })
     }
-    return JSON.stringify(grouped)
+    return list(grouped)
   }
 
   formatRename(result: Record<string, any>): string {
@@ -36,33 +37,15 @@ export class JsonFormatter implements Formatter {
   }
 
   formatDocumentSymbols(symbols: Record<string, any>[]): string {
-    return JSON.stringify(symbols)
+    return list(symbols)
   }
 
   formatWorkspaceSymbols(symbols: Record<string, any>[]): string {
-    const grouped: Record<string, any[]> = {}
-    for (const s of symbols) {
-      const { file, ...rest } = s
-      if (!file)
-        continue
-      if (!grouped[file])
-        grouped[file] = []
-      grouped[file].push(rest)
-    }
-    return JSON.stringify(grouped)
+    return list(groupByFile(symbols))
   }
 
   formatCallHierarchyItems(items: Record<string, any>[]): string {
-    const grouped: Record<string, any[]> = {}
-    for (const item of items) {
-      const { file, ...rest } = item
-      if (!file)
-        continue
-      if (!grouped[file])
-        grouped[file] = []
-      grouped[file].push(rest)
-    }
-    return JSON.stringify(grouped)
+    return list(groupByFile(items))
   }
 
   formatIncomingCalls(calls: Record<string, any>[]): string {
@@ -71,12 +54,12 @@ export class JsonFormatter implements Formatter {
       const file = call.caller?.file
       if (!file)
         continue
-      const { file: _cf, ...callerRest } = call.caller || {}
+      const { file: _file, ...caller } = call.caller
       if (!grouped[file])
         grouped[file] = []
-      grouped[file].push({ caller: callerRest, callSites: call.callSites })
+      grouped[file].push({ caller, callSites: call.callSites })
     }
-    return JSON.stringify(grouped)
+    return list(grouped)
   }
 
   formatOutgoingCalls(calls: Record<string, any>[]): string {
@@ -85,11 +68,35 @@ export class JsonFormatter implements Formatter {
       const file = call.callee?.file
       if (!file)
         continue
-      const { file: _cf, ...calleeRest } = call.callee || {}
+      const { file: _file, ...callee } = call.callee
       if (!grouped[file])
         grouped[file] = []
-      grouped[file].push({ callee: calleeRest, callSites: call.callSites })
+      grouped[file].push({ callee, callSites: call.callSites })
     }
-    return JSON.stringify(grouped)
+    return list(grouped)
   }
+
+  formatTruncation(result: string, shown: number, total: number): string {
+    return JSON.stringify({
+      ...JSON.parse(result),
+      truncated: { shown, total },
+    })
+  }
+}
+
+function list(items: unknown): string {
+  return JSON.stringify({ items })
+}
+
+function groupByFile(items: Record<string, any>[]): Record<string, any[]> {
+  const grouped: Record<string, any[]> = {}
+  for (const item of items) {
+    const { file, ...rest } = item
+    if (!file)
+      continue
+    if (!grouped[file])
+      grouped[file] = []
+    grouped[file].push(rest)
+  }
+  return grouped
 }

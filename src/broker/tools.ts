@@ -5,11 +5,14 @@ import { listInstances, publicInstance } from '../instance/registry'
 import { InstanceResolutionError, resolveInstance } from '../instance/router'
 import { translateMcp } from '../mcpLocale'
 import {
-  destinationUriDescription,
+  immediateWriteWarning,
   lspOperations,
-  lspToolDescription,
-  sourceUriDescription,
-  uriDescription,
+  lspSafetyDescription,
+  lspToolIntroduction,
+  nativePathDescription,
+  operationIntentDescription,
+  pathAndPositionDescription,
+  specialUriDescription,
 } from '../protocol'
 
 const INSTANCE_REQUEST_TIMEOUT_MS = 30_000
@@ -47,14 +50,20 @@ export function addBrokerTools(server: McpServer, locale: string): void {
     'execute_lsp',
     {
       title: tMcp('Execute LSP Operation'),
-      description: `${tMcp(lspToolDescription)}\n\n${tMcp('Pass instanceId when multiple VS Code instances cover the same project.')}`,
+      description: [
+        lspToolIntroduction,
+        pathAndPositionDescription,
+        operationIntentDescription,
+        lspSafetyDescription,
+        'Pass instanceId when multiple VS Code instances cover the same project.',
+      ].map(tMcp).join('\n\n'),
       inputSchema: {
-        operation: z.enum(lspOperations).describe(tMcp('Which LSP operation to execute.')),
-        uri: z.string().min(1).describe(tMcp(uriDescription)),
-        line: z.number().int().min(1).optional().describe(tMcp('Line number (1-based, as shown in editor). Required for position-dependent operations.')),
-        character: z.number().int().min(1).optional().describe(tMcp('Character offset (1-based, as shown in editor). Required for position-dependent operations.')),
-        newName: z.string().optional().describe(tMcp('New symbol name. Required only for "rename".')),
-        query: z.string().optional().describe(tMcp('Search query. Required only for "workspace_symbols".')),
+        operation: z.enum(lspOperations).describe(tMcp('Operation selected by intent. See the tool description for position and safety requirements.')),
+        uri: z.string().min(1).describe(`${tMcp(nativePathDescription)}\n${tMcp(specialUriDescription)}`),
+        line: z.number().int().min(1).optional().describe(tMcp('1-based line. Required only for position-based operations. Reuse a returned range start or namePosition; do not guess.')),
+        character: z.number().int().min(1).optional().describe(tMcp('1-based character. Required only for position-based operations. For signature_help, use a position inside the intended call argument.')),
+        newName: z.string().min(1).optional().describe(tMcp('Non-empty new symbol name. Required only for rename, which immediately modifies the workspace.')),
+        query: z.string().min(1).optional().describe(tMcp('Non-empty project symbol query. Required only for workspace_symbols; empty project-wide searches are rejected.')),
         instanceId: z.string().optional().describe(tMcp('Exact instance ID returned by list_instances. Optional when the path matches one instance.')),
       },
     },
@@ -73,10 +82,10 @@ export function addBrokerTools(server: McpServer, locale: string): void {
     'rename_resource',
     {
       title: tMcp('Rename Workspace Resource'),
-      description: tMcp('Rename a file or directory through VS Code. Language extensions can update affected references during the operation.'),
+      description: `${tMcp('Rename a file or directory inside the selected VS Code workspace. Both paths must remain inside its workspace roots. Language extensions may update affected references.')} ${tMcp(immediateWriteWarning)}`,
       inputSchema: {
-        oldUri: z.string().min(1).describe(tMcp(sourceUriDescription)),
-        newUri: z.string().min(1).describe(tMcp(destinationUriDescription)),
+        oldUri: z.string().min(1).describe(tMcp(nativePathDescription)),
+        newUri: z.string().min(1).describe(tMcp(nativePathDescription)),
         overwrite: z.boolean().optional().default(false).describe(tMcp('Whether an existing destination may be replaced. Defaults to false.')),
         instanceId: z.string().optional().describe(tMcp('Exact instance ID returned by list_instances. Optional when the path matches one instance.')),
       },
@@ -101,6 +110,7 @@ async function forward(
 ): Promise<string> {
   try {
     const instance = resolveInstance(await listInstances(), instanceId, uri)
+    assertLoopbackEndpoint(instance.endpoint)
     const response = await fetch(`${instance.endpoint}${path}`, {
       method: 'POST',
       headers: {
@@ -144,6 +154,12 @@ async function forward(
       },
     })
   }
+}
+
+function assertLoopbackEndpoint(endpoint: string): void {
+  const url = new URL(endpoint)
+  if (url.protocol !== 'http:' || url.hostname !== '127.0.0.1')
+    throw new Error('VS Code instance endpoint must use the 127.0.0.1 loopback address')
 }
 
 interface ForwardResponse {

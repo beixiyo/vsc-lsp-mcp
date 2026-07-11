@@ -1,5 +1,6 @@
 import type { InstanceRecord } from './registry'
 import { fileURLToPath } from 'node:url'
+import { hasUriScheme, isFileUri } from '../pathInput'
 import { normalizeRoutingPath } from './registry'
 
 /**
@@ -79,9 +80,9 @@ function resolveUnique(instances: InstanceRecord[]): InstanceRecord {
 
 function inputPath(uri: string): string | undefined {
   try {
-    if (/^file:\/\//i.test(uri))
+    if (isFileUri(uri))
       return normalizeRoutingPath(fileURLToPath(uri))
-    if (/^[a-z][a-z\d+.-]*:/i.test(uri))
+    if (hasUriScheme(uri))
       return undefined
     return normalizeRoutingPath(uri)
   }

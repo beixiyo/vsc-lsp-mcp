@@ -18,6 +18,26 @@ export class MarkdownFormatter implements Formatter {
     return `## Hover\n\n${contents.join('\n\n---\n\n')}`
   }
 
+  formatSignatureHelp(items: Record<string, any>[]): string {
+    if (items.length === 0)
+      return `## Signature Help\n\n${tMcp('No signature help available.')}`
+
+    const lines = items.flatMap((item) => {
+      const active = item.activeParameter
+        ? `; ${tMcp('active parameter: {parameter}', { parameter: item.activeParameter })}`
+        : ''
+      const lines = [`- \`${item.label}\`${item.active ? ' (active)' : ''}${active}`]
+      if (item.documentation)
+        lines.push(`  ${item.documentation}`)
+      for (const [index, parameter] of (item.parameters ?? []).entries()) {
+        const documentation = parameter.documentation ? `: ${parameter.documentation}` : ''
+        lines.push(`  - ${index + 1}. \`${parameter.label}\`${documentation}`)
+      }
+      return lines
+    })
+    return `## Signature Help\n\n${lines.join('\n')}`
+  }
+
   formatCompletions(items: Record<string, any>[]): string {
     if (items.length === 0) {
       return `## Completions\n\n${tMcp('No completions available.')}`
@@ -157,6 +177,8 @@ export class MarkdownFormatter implements Formatter {
         const parts: string[] = [tMcp('line {range}', { range: call.caller.range })]
         if (call.caller.namePosition)
           parts.push(tMcp('name at {pos}', { pos: call.caller.namePosition }))
+        if (call.caller.detail)
+          parts.push(tMcp('detail: {detail}', { detail: call.caller.detail }))
         if (call.callSites?.length)
           parts.push(tMcp('called at: {sites}', { sites: call.callSites.join(', ') }))
         return `  - \`${call.caller.name}\` (${call.caller.kind}): ${parts.join(', ')}`
@@ -186,6 +208,8 @@ export class MarkdownFormatter implements Formatter {
         const parts: string[] = [tMcp('line {range}', { range: call.callee.range })]
         if (call.callee.namePosition)
           parts.push(tMcp('name at {pos}', { pos: call.callee.namePosition }))
+        if (call.callee.detail)
+          parts.push(tMcp('detail: {detail}', { detail: call.callee.detail }))
         if (call.callSites?.length)
           parts.push(tMcp('called at: {sites}', { sites: call.callSites.join(', ') }))
         return `  - \`${call.callee.name}\` (${call.callee.kind}): ${parts.join(', ')}`
@@ -194,6 +218,10 @@ export class MarkdownFormatter implements Formatter {
     })
 
     return `## Outgoing Calls\n\n${lines.join('\n')}`
+  }
+
+  formatTruncation(result: string, shown: number, total: number): string {
+    return `${result}\n\n${tMcp('(Showing {shown} of {total})', { shown, total })}`
   }
 
   /**

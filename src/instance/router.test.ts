@@ -22,13 +22,19 @@ describe('instance router', () => {
   })
 
   it('accepts Windows separators at the protocol boundary', () => {
-    const instances = [fixture('windows', 'C:/code/app')]
+    const instances = [fixture('other', 'D:/code/app'), fixture('windows', 'C:/code/app')]
     expect(resolveInstance(instances, undefined, 'C:\\code\\app\\main.ts').instanceId).toBe('windows')
+    expect(resolveInstance(instances, undefined, 'C:/code/app/main.ts').instanceId).toBe('windows')
   })
 
   it('preserves filesystem roots during prefix matching', () => {
     expect(resolveInstance([fixture('unix', '/')], undefined, '/tmp/main.ts').instanceId).toBe('unix')
     expect(resolveInstance([fixture('drive', 'C:/')], undefined, 'C:/main.ts').instanceId).toBe('drive')
+  })
+
+  it('routes single-slash file URIs by path', () => {
+    const instances = [fixture('other', '/other'), fixture('unix', '/code/app')]
+    expect(resolveInstance(instances, undefined, 'file:/code/app/main.ts').instanceId).toBe('unix')
   })
 
   it('distinguishes missing IDs, unmatched paths, and an empty registry', () => {

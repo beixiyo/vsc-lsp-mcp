@@ -1,9 +1,15 @@
 ## Unreleased
 
+### Breaking
+- JSON 列表结果统一使用 `{ items, truncated? }` 顶层结构，不再返回裸数组或裸分组对象
+- 所有 LSP range 从仅行号的 `startLine-endLine` 改为可直接复用的 1-based `line:character-line:character`
+- `workspace_symbols` 不再接受空 query，资源重命名仅允许当前 VS Code 工作区内的本地路径
+
 ### Added
 - 新增独立多实例 Broker，外部 AI 通过一个稳定 MCP 地址发现并调用多个 VS Code 窗口
 - 新增 `health` 与 `list_instances` 工具，`execute_lsp` / `rename_resource` 支持可选 `instanceId`
 - 支持省略 `instanceId` 时按工作区根目录最长路径前缀自动路由，歧义时明确拒绝猜测
+- 新增只读的 `signature_help` 与 `type_definition` operation
 
 ### Changed
 - 每个 VS Code 窗口改为仅监听带随机 token 的 loopback 内部端点
@@ -13,6 +19,10 @@
 - CORS 改为默认关闭，浏览器 MCP 客户端可通过配置显式开启
 - 实例路由错误细分为实例不存在、路径无匹配、无活动实例和多实例歧义
 - 注册目录按当前用户隔离并校验权限，Broker 启动失败时会回滚当前窗口的内部服务
+- 按用户意图重写 `execute_lsp` 描述与参数说明，明确 1-based 坐标、路径规则和立即写入风险
+- 拒绝 0 行/0 列、相对路径、空 `workspace_symbols` query 和无效 Java class URI
+- 主要列表输出受 `lsp-mcp.maxResults` 限制，符号树按节点预算截断并返回 `shown` / `total`，completion 输出同时去重
+- 修复 Windows 盘符路径被误判为 URI scheme 的问题
 
 ### Removed
 - 移除不再适用于固定 Broker 地址的 `lsp-mcp.maxRetries` 配置
