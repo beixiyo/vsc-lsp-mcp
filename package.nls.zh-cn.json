@@ -4,7 +4,7 @@
   "lsp-mcp.configuration.enabled.description": "启用或禁用 LSP MCP 服务器。",
   "lsp-mcp.configuration.port.description": "共享 LSP MCP Broker 使用的首选端口。",
   "lsp-mcp.configuration.maxRetries.description": "默认端口被占用时的最大端口重试次数。",
-  "lsp-mcp.configuration.cors.enabled.description": "启用或禁用 CORS（跨域资源共享）。",
+  "lsp-mcp.configuration.cors.enabled.description": "启用或禁用 CORS（跨域资源共享）。默认关闭，仅在使用浏览器 MCP 客户端时开启。",
   "lsp-mcp.configuration.cors.allowOrigins.description": "允许的 CORS 来源。使用 '*' 允许所有来源，或提供逗号分隔的来源列表（例如 'http://localhost:3000,http://localhost:5173'）。",
   "lsp-mcp.configuration.cors.withCredentials.description": "是否允许 CORS 请求携带凭证（cookie、授权标头）。",
   "lsp-mcp.configuration.cors.exposeHeaders.description": "允许浏览器访问的响应头。提供逗号分隔的响应头列表（例如 'Mcp-Session-Id,Content-Type'）。",

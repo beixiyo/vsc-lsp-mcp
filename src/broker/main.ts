@@ -34,7 +34,7 @@ async function main(): Promise<void> {
   broker = await startBroker({
     port,
     maxRetries,
-    corsEnabled: process.env.VSC_LSP_MCP_CORS_ENABLED !== 'false',
+    corsEnabled: process.env.VSC_LSP_MCP_CORS_ENABLED === 'true',
     corsOrigins: process.env.VSC_LSP_MCP_CORS_ORIGINS || '*',
     corsCredentials: process.env.VSC_LSP_MCP_CORS_CREDENTIALS === 'true',
     corsExposeHeaders: process.env.VSC_LSP_MCP_CORS_EXPOSE_HEADERS || 'Mcp-Session-Id',

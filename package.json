@@ -61,7 +61,7 @@
         },
         "lsp-mcp.cors.enabled": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "%lsp-mcp.configuration.cors.enabled.description%"
         },
         "lsp-mcp.cors.allowOrigins": {

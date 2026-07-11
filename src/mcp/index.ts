@@ -23,7 +23,7 @@ export async function startMcp(context: ExtensionContext): Promise<void> {
     const brokerPort = await ensureBroker(context, {
       port: preferredPort,
       maxRetries,
-      corsEnabled: config.get('cors.enabled', true),
+      corsEnabled: config.get('cors.enabled', false),
       corsOrigins: config.get('cors.allowOrigins', '*'),
       corsCredentials: config.get('cors.withCredentials', false),
       corsExposeHeaders: config.get('cors.exposeHeaders', 'Mcp-Session-Id'),
