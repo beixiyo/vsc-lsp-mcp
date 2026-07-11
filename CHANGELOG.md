@@ -1,5 +1,7 @@
 ## Unreleased
 
+## [0.3.0] - 2026-07-11
+
 ### Breaking
 - JSON 列表结果统一使用 `{ items, truncated? }` 顶层结构，不再返回裸数组或裸分组对象
 - 所有 LSP range 从仅行号的 `startLine-endLine` 改为可直接复用的 1-based `line:character-line:character`

@@ -33,6 +33,8 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 
 它通过模型上下文协议（MCP）暴露了语言服务器协议（LSP）功能。这使得 AI 助手和外部工具无需直接集成即可利用 VSCode 强大的语言智能功能
 
+> **使用 Neovim？** 请查看姊妹项目 [vv-mcp.nvim](https://github.com/beixiyo/vv-mcp.nvim)，它通过 MCP 暴露 Neovim LSP 客户端与实时编辑器上下文
+
 ![vscode-ext](./docAssets/vsc-ext.webp)
 ![demo](./docAssets/demo.webp)
 
@@ -126,13 +128,13 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 
 多实例首版仅承诺本机桌面工作区和 `file:` 资源。Remote SSH、WSL、Dev Container 与虚拟工作区暂不声明支持
 
-### Workspace 工具（Unreleased）
+### Workspace 工具
 
 | 工具 | 描述 |
 |------|------|
-| `rename_resource` | 通过 VS Code `WorkspaceEdit` API 重命名文件或目录，接收 `oldUri`、`newUri` 和可选的 `overwrite` 参数 |
+| `rename_resource` | 通过 VS Code `WorkspaceEdit` API 重命名文件或目录，接收 `oldUri`、`newUri` 和可选的 `overwrite` 参数；语言扩展可在同一个 workspace edit 中更新受影响的 import 与 export |
 
-> **已知问题：** VS Code 1.115 中资源可成功重命名，但 TypeScript import 路径可能不会更新。使用后请检查旧路径并运行类型检查
+例如，内置 TypeScript provider 会在重命名被引用的 `.ts` 或 `.tsx` 文件时同步更新相对 import 与 barrel export。具体联动编辑仍取决于语言 provider，因此资源重命名完成后应继续检查 diagnostics
 
 ## 📋 配置
 

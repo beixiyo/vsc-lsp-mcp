@@ -33,6 +33,8 @@ VSCode LSP MCP is a Visual Studio Code extension that exposes Language Server Pr
 
 This allows AI assistants and external tools to utilize VSCode's powerful language intelligence capabilities without direct integration.
 
+> **Using Neovim?** See [vv-mcp.nvim](https://github.com/beixiyo/vv-mcp.nvim), the sibling implementation that exposes Neovim LSP clients and live editor context through MCP.
+
 ![vscode-ext](./docAssets/vsc-ext.webp)
 ![demo](./docAssets/demo.webp)
 
@@ -126,13 +128,13 @@ If two windows open the same project, routing is intentionally rejected as ambig
 
 The first multi-instance release supports local desktop workspaces and `file:` resources. Remote SSH, WSL, Dev Containers, and virtual workspaces are not yet advertised as supported.
 
-### Workspace tools (Unreleased)
+### Workspace tools
 
 | Tool | Description |
 |------|-------------|
-| `rename_resource` | Rename a file or directory through VS Code's `WorkspaceEdit` API. Accepts `oldUri`, `newUri`, and optional `overwrite` parameters. |
+| `rename_resource` | Rename a file or directory through VS Code's `WorkspaceEdit` API. Accepts `oldUri`, `newUri`, and optional `overwrite` parameters. Language extensions can update affected imports and exports as part of the same workspace edit. |
 
-> **Known issue:** On VS Code 1.115, resources are renamed successfully, but TypeScript import paths may not update. Check stale paths and run type checking afterward.
+For example, the built-in TypeScript provider updates relative imports and barrel exports when a referenced `.ts` or `.tsx` file is renamed. The exact companion edits remain language-provider dependent, so inspect diagnostics after applying a resource rename.
 
 ## 📋 Configuration
 
