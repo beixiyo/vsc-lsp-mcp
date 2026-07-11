@@ -3,7 +3,6 @@
   "lsp-mcp.configuration.title": "LSP MCP Server Configuration",
   "lsp-mcp.configuration.enabled.description": "Enable or disable the LSP MCP server.",
   "lsp-mcp.configuration.port.description": "Preferred port for the shared LSP MCP broker.",
-  "lsp-mcp.configuration.maxRetries.description": "Maximum number of port retry attempts when the default port is occupied.",
   "lsp-mcp.configuration.cors.enabled.description": "Enable or disable CORS (Cross-Origin Resource Sharing). Disabled by default; enable it only for browser-based MCP clients.",
   "lsp-mcp.configuration.cors.allowOrigins.description": "Allowed origins for CORS. Use '*' to allow all origins, or provide a comma-separated list of origins (e.g., 'http://localhost:3000,http://localhost:5173').",
   "lsp-mcp.configuration.cors.withCredentials.description": "Whether to allow credentials (cookies, authorization headers) in CORS requests.",

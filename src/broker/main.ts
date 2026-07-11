@@ -3,21 +3,17 @@ import { join } from 'node:path'
 import { PRIVATE_FILE_MODE } from '../filePermissions'
 import { createRegistry, getRegistryRoot } from '../instance/registry'
 import { startBroker } from './server'
-import { BROKER_PROTOCOL_VERSION, readBrokerState } from './state'
-
-const STARTUP_LOCK_GRACE_MS = 5_000
 
 /** 独立 Broker 进程入口，负责抢占单实例锁并管理退出清理 */
 async function main(): Promise<void> {
   const registryRoot = getRegistryRoot()
   await createRegistry(registryRoot)
   const lockPath = join(registryRoot, 'broker.lock')
-  const lock = await acquireLock(lockPath, registryRoot)
+  const lock = await acquireLock(lockPath)
   if (lock == null)
     return
 
   const port = positiveInteger(process.env.VSC_LSP_MCP_PORT, 9527)
-  const maxRetries = positiveInteger(process.env.VSC_LSP_MCP_MAX_RETRIES, 10)
   let broker: Awaited<ReturnType<typeof startBroker>> | undefined
   let shuttingDown = false
 
@@ -33,7 +29,6 @@ async function main(): Promise<void> {
 
   broker = await startBroker({
     port,
-    maxRetries,
     corsEnabled: process.env.VSC_LSP_MCP_CORS_ENABLED === 'true',
     corsOrigins: process.env.VSC_LSP_MCP_CORS_ORIGINS || '*',
     corsCredentials: process.env.VSC_LSP_MCP_CORS_CREDENTIALS === 'true',
@@ -49,7 +44,7 @@ async function main(): Promise<void> {
  * 原子获取 Broker 启动锁
  * 活跃 Broker 持有锁时返回 undefined，陈旧锁则会被回收
  */
-async function acquireLock(path: string, registryRoot: string): Promise<number | undefined> {
+async function acquireLock(path: string): Promise<number | undefined> {
   try {
     const descriptor = openSync(path, 'wx', PRIVATE_FILE_MODE)
     writeLock(descriptor)
@@ -58,14 +53,8 @@ async function acquireLock(path: string, registryRoot: string): Promise<number |
   catch {
     try {
       const lock = JSON.parse(readFileSync(path, 'utf8')) as BrokerLock
-      if (isProcessAlive(lock.pid)) {
-        if (Date.now() - lock.createdAt < STARTUP_LOCK_GRACE_MS)
-          return undefined
-
-        const state = await readBrokerState(registryRoot)
-        if (state?.pid === lock.pid && await isHealthyBroker(state.port))
-          return undefined
-      }
+      if (isProcessAlive(lock.pid))
+        return undefined
     }
     catch {}
 
@@ -84,19 +73,6 @@ function isProcessAlive(pid: number): boolean {
   try {
     process.kill(pid, 0)
     return true
-  }
-  catch {
-    return false
-  }
-}
-
-async function isHealthyBroker(port: number): Promise<boolean> {
-  try {
-    const response = await fetch(`http://127.0.0.1:${port}/health`, {
-      signal: AbortSignal.timeout(500),
-    })
-    const health = await response.json() as { protocolVersion?: number }
-    return response.ok && health.protocolVersion === BROKER_PROTOCOL_VERSION
   }
   catch {
     return false

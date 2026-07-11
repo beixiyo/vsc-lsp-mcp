@@ -25,7 +25,7 @@ export function addBrokerTools(server: McpServer, locale: string): void {
     async () => ({
       content: [{
         type: 'text',
-        text: JSON.stringify({ status: 'ok', registry: process.env.VSC_LSP_MCP_REGISTRY }),
+        text: JSON.stringify({ status: 'ok' }),
       }],
     }),
   )

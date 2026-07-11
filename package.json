@@ -54,11 +54,6 @@
           "default": 9527,
           "description": "%lsp-mcp.configuration.port.description%"
         },
-        "lsp-mcp.maxRetries": {
-          "type": "number",
-          "default": 10,
-          "description": "%lsp-mcp.configuration.maxRetries.description%"
-        },
         "lsp-mcp.cors.enabled": {
           "type": "boolean",
           "default": false,

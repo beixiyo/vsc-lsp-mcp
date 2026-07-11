@@ -27,7 +27,6 @@ export async function ensureBroker(
       ELECTRON_RUN_AS_NODE: '1',
       VSC_LSP_MCP_REGISTRY: registryRoot,
       VSC_LSP_MCP_PORT: String(options.port),
-      VSC_LSP_MCP_MAX_RETRIES: String(options.maxRetries),
       VSC_LSP_MCP_CORS_ENABLED: String(options.corsEnabled),
       VSC_LSP_MCP_CORS_ORIGINS: options.corsOrigins,
       VSC_LSP_MCP_CORS_CREDENTIALS: String(options.corsCredentials),
@@ -51,7 +50,6 @@ export async function ensureBroker(
 /** 启动共享 Broker 所需的运行参数 */
 export interface BrokerLaunchOptions {
   port: number
-  maxRetries: number
   corsEnabled: boolean
   corsOrigins: string
   corsCredentials: boolean
@@ -71,31 +69,8 @@ async function activeBrokerPort(registryRoot: string): Promise<number | undefine
     const health = await response.json() as { protocolVersion?: number }
     if (response.ok && health.protocolVersion === BROKER_PROTOCOL_VERSION)
       return state.port
-    if (response.ok) {
-      process.kill(state.pid, 'SIGTERM')
-      await waitForProcessExit(state.pid)
-    }
   }
   catch {}
 
   return undefined
-}
-
-async function waitForProcessExit(pid: number): Promise<void> {
-  for (let attempt = 0; attempt < 60; attempt++) {
-    if (!isProcessAlive(pid))
-      return
-    await new Promise(resolve => setTimeout(resolve, 50))
-  }
-  process.kill(pid, 'SIGKILL')
-}
-
-function isProcessAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0)
-    return true
-  }
-  catch {
-    return false
-  }
 }

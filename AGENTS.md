@@ -39,6 +39,7 @@ src/broker/main.ts -> src/broker/server.ts
 - `src/broker/main.ts` 由 `src/broker/ensure.ts` 通过独立 Node 子进程启动，不由 VS Code 直接加载
 - `tsup.config.ts` 必须同时产出 `dist/index.js` 和 `dist/broker.js`
 - 外部 MCP 客户端只连接共享 Broker，不直接连接各窗口的内部端口
+- Broker 使用固定外部端口；端口被占用时必须明确失败，不能回退到客户端未知的其他端口
 - 每个窗口使用随机内部端口和随机 token，仅监听 `127.0.0.1`
 - Broker 生命周期必须与任意单个 VS Code 窗口解耦，关闭首个窗口不能导致其他窗口断线
 - 多实例首版只承诺本机桌面 `file:` 工作区，不要未经设计直接宣称支持 Remote SSH、WSL、Dev Container 或虚拟工作区

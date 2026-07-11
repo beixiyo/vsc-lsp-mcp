@@ -16,13 +16,11 @@ export async function startMcp(context: ExtensionContext): Promise<void> {
   }
 
   const preferredPort = config.get('port', 9527)
-  const maxRetries = config.get('maxRetries', 10)
-
+  let instance: Awaited<ReturnType<typeof startInstanceServer>> | undefined
   try {
-    await startInstanceServer(context)
+    instance = await startInstanceServer(context)
     const brokerPort = await ensureBroker(context, {
       port: preferredPort,
-      maxRetries,
       corsEnabled: config.get('cors.enabled', false),
       corsOrigins: config.get('cors.allowOrigins', '*'),
       corsCredentials: config.get('cors.withCredentials', false),
@@ -37,6 +35,7 @@ export async function startMcp(context: ExtensionContext): Promise<void> {
     ))
   }
   catch (error) {
+    await instance?.dispose()
     window.showErrorMessage(l10n.t(
       'Failed to start LSP MCP server: {message}',
       { message: error instanceof Error ? error.message : String(error) },

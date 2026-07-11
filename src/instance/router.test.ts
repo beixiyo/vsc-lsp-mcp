@@ -30,6 +30,19 @@ describe('instance router', () => {
     expect(resolveInstance([fixture('unix', '/')], undefined, '/tmp/main.ts').instanceId).toBe('unix')
     expect(resolveInstance([fixture('drive', 'C:/')], undefined, 'C:/main.ts').instanceId).toBe('drive')
   })
+
+  it('distinguishes missing IDs, unmatched paths, and an empty registry', () => {
+    const instances = [fixture('a', '/code/a')]
+    expect(() => resolveInstance(instances, 'missing', '/code/a/main.ts')).toThrowError(
+      expect.objectContaining<Partial<InstanceResolutionError>>({ code: 'instance_not_found' }),
+    )
+    expect(() => resolveInstance(instances, undefined, '/code/b/main.ts')).toThrowError(
+      expect.objectContaining<Partial<InstanceResolutionError>>({ code: 'no_matching_instance' }),
+    )
+    expect(() => resolveInstance([], undefined, undefined)).toThrowError(
+      expect.objectContaining<Partial<InstanceResolutionError>>({ code: 'no_active_instances' }),
+    )
+  })
 })
 
 function fixture(instanceId: string, root: string): InstanceRecord {

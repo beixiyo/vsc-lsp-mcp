@@ -1,14 +1,18 @@
 import { createHash, randomUUID } from 'node:crypto'
-import { chmod, mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { chmod, lstat, mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, join } from 'node:path'
-import { PRIVATE_DIRECTORY_MODE, PRIVATE_FILE_MODE } from '../filePermissions'
+import {
+  PRIVATE_DIRECTORY_MODE,
+  PRIVATE_FILE_MODE,
+  SHARED_ACCESS_MODE_MASK,
+} from '../filePermissions'
 
 const INSTANCE_TTL_MS = 15_000
 
 /** 获取当前用户的 Broker 与实例共享注册目录 */
 export function getRegistryRoot(): string {
-  return process.env.VSC_LSP_MCP_REGISTRY || join(tmpdir(), 'vsc-lsp-mcp')
+  return process.env.VSC_LSP_MCP_REGISTRY || join(tmpdir(), `vsc-lsp-mcp-${userIdentity()}`)
 }
 
 /** 获取实例记录所在目录 */
@@ -18,14 +22,13 @@ export function getInstancesDir(registryRoot = getRegistryRoot()): string {
 
 /** 创建注册目录并收紧访问权限，实例 token 不应对其他用户公开 */
 export async function createRegistry(registryRoot = getRegistryRoot()): Promise<void> {
-  await mkdir(getInstancesDir(registryRoot), { recursive: true, mode: PRIVATE_DIRECTORY_MODE })
-  await chmod(registryRoot, PRIVATE_DIRECTORY_MODE).catch(() => {})
-  await chmod(getInstancesDir(registryRoot), PRIVATE_DIRECTORY_MODE).catch(() => {})
+  await ensurePrivateDirectory(registryRoot)
+  await ensurePrivateDirectory(getInstancesDir(registryRoot))
 }
 
 /** 根据工作区根目录生成稳定项目 ID 和本次窗口唯一的实例 ID */
 export function createInstanceIdentity(roots: string[]): Pick<InstanceRecord, 'instanceId' | 'projectId'> {
-  const normalizedRoots = roots.map(normalizePath).sort()
+  const normalizedRoots = roots.map(normalizeRoutingPath).sort()
   const projectId = `${basename(normalizedRoots[0] || 'workspace')}-${createHash('sha256')
     .update(normalizedRoots.join('\0'))
     .digest('hex')
@@ -94,11 +97,33 @@ export function publicInstance(record: InstanceRecord): PublicInstance {
 }
 
 /** 统一路径分隔符、尾部斜杠和 Windows 大小写，供身份计算与路由复用 */
-export function normalizePath(value: string): string {
+export function normalizeRoutingPath(value: string): string {
   let normalized = value.replaceAll('\\', '/')
   if (normalized !== '/' && !/^[a-z]:\/$/i.test(normalized))
     normalized = normalized.replace(/\/+$/, '')
   return process.platform === 'win32' ? normalized.toLowerCase() : normalized
+}
+
+async function ensurePrivateDirectory(path: string): Promise<void> {
+  await mkdir(path, { recursive: true, mode: PRIVATE_DIRECTORY_MODE })
+  const before = await lstat(path)
+  if (!before.isDirectory() || before.isSymbolicLink())
+    throw new Error(`Registry path is not a private directory: ${path}`)
+
+  if (process.platform === 'win32')
+    return
+
+  await chmod(path, PRIVATE_DIRECTORY_MODE)
+  const after = await lstat(path)
+  const uid = process.getuid?.()
+  if (uid != null && after.uid !== uid)
+    throw new Error(`Registry directory is owned by another user: ${path}`)
+  if ((after.mode & SHARED_ACCESS_MODE_MASK) !== 0)
+    throw new Error(`Registry directory is accessible by other users: ${path}`)
+}
+
+function userIdentity(): string {
+  return process.getuid?.().toString() || process.env.USERNAME || process.env.USER || 'current-user'
 }
 
 function instancePath(instanceId: string, registryRoot: string): string {

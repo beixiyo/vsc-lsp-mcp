@@ -37,7 +37,6 @@ describe('multi-instance broker', () => {
 
     const broker = await startBroker({
       port: 0,
-      maxRetries: 0,
       corsEnabled: false,
       corsOrigins: '*',
       corsCredentials: false,

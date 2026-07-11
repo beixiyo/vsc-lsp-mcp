@@ -74,7 +74,13 @@ export async function startBroker(options: BrokerOptions): Promise<BrokerHandle>
   app.get('/mcp', handleMcp)
   app.delete('/mcp', handleMcp)
 
-  const { server, port } = await listenWithRetry(app, options.port, options.maxRetries)
+  const server = await listen(app, options.port)
+  const address = server.address()
+  if (!address || typeof address === 'string') {
+    await closeServer(server)
+    throw new Error('Failed to resolve broker port')
+  }
+  const port = address.port
   await writeBrokerState({
     pid: process.pid,
     port,
@@ -129,30 +135,6 @@ export async function startBroker(options: BrokerOptions): Promise<BrokerHandle>
   return { port, dispose }
 }
 
-async function listenWithRetry(
-  app: express.Express,
-  initialPort: number,
-  maxRetries: number,
-): Promise<{ server: HttpServer, port: number }> {
-  let lastError: unknown
-  for (let offset = 0; offset <= maxRetries; offset++) {
-    const port = initialPort + offset
-    try {
-      const server = await listen(app, port)
-      const address = server.address()
-      if (!address || typeof address === 'string')
-        throw new Error('Failed to resolve broker port')
-      return { server, port: address.port }
-    }
-    catch (error) {
-      lastError = error
-      if ((error as NodeJS.ErrnoException).code !== 'EADDRINUSE')
-        throw error
-    }
-  }
-  throw lastError
-}
-
 function listen(app: express.Express, port: number): Promise<HttpServer> {
   return new Promise((resolve, reject) => {
     const server = app.listen(port, '127.0.0.1', () => resolve(server))
@@ -167,7 +149,6 @@ function closeServer(server: HttpServer): Promise<void> {
 /** 共享 Broker 的监听、跨域和生命周期配置 */
 export interface BrokerOptions {
   port: number
-  maxRetries: number
   corsEnabled: boolean
   corsOrigins: string
   corsCredentials: boolean

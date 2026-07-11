@@ -11,7 +11,7 @@ import { executeResourceRename } from '../mcp/workspaceTools'
 import {
   createInstanceIdentity,
   getRegistryRoot,
-  normalizePath,
+  normalizeRoutingPath,
   removeInstance,
   writeInstance,
 } from './registry'
@@ -30,7 +30,7 @@ export async function startInstanceServer(
 
   const roots = (workspace.workspaceFolders || [])
     .filter(folder => folder.uri.scheme === 'file')
-    .map(folder => normalizePath(folder.uri.fsPath))
+    .map(folder => normalizeRoutingPath(folder.uri.fsPath))
   const identity = createInstanceIdentity(roots)
   const token = randomBytes(32).toString('hex')
   const app = express()
@@ -75,7 +75,7 @@ export async function startInstanceServer(
       ...identity,
       pid: process.pid,
       label: workspace.name || identity.projectId,
-      cwd: normalizePath(process.cwd()),
+      cwd: normalizeRoutingPath(process.cwd()),
       roots,
       schemes: ['file'],
       locale: getMcpLocale(),
@@ -98,7 +98,11 @@ export async function startInstanceServer(
   }, HEARTBEAT_MS)
   heartbeat.unref()
 
+  let disposed = false
   const dispose = async () => {
+    if (disposed)
+      return
+    disposed = true
     clearInterval(heartbeat)
     await refresh
     await removeInstance(record.instanceId, registryRoot)

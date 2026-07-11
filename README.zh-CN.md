@@ -126,7 +126,6 @@ VSCode LSP MCP 是一个 Visual Studio Code 扩展。**扩展 ID**：`cjl.lsp-mc
 | --------------------------------- | ------------------------------------------------------------------------------------------ | --------- | ------- |
 | `lsp-mcp.enabled`                 | 启用或禁用 LSP MCP 服务器                                                                  | `boolean` | `true`  |
 | `lsp-mcp.port`                    | 共享 MCP Broker 的首选端口                                                                 | `number`  | `9527`  |
-| `lsp-mcp.maxRetries`              | 端口被占用时的最大重试次数                                                                 | `number`  | `10`    |
 | `lsp-mcp.cors.enabled`            | 为浏览器 MCP 客户端启用 CORS；原生客户端保持关闭                                            | `boolean` | `false` |
 | `lsp-mcp.cors.allowOrigins`       | 允许的 CORS 源。使用 `*` 允许所有源，或提供逗号分隔的源列表（例如 `http://localhost:3000,http://localhost:5173`） | `string`  | `*`     |
 | `lsp-mcp.cors.withCredentials`    | 是否允许在 CORS 请求中携带凭证（cookie、授权标头）                                         | `boolean` | `false` |

@@ -1,6 +1,6 @@
 import type { InstanceRecord } from './registry'
 import { fileURLToPath } from 'node:url'
-import { normalizePath } from './registry'
+import { normalizeRoutingPath } from './registry'
 
 /**
  * 根据显式实例 ID 或最长工作区路径前缀选择目标 VS Code 窗口
@@ -29,7 +29,7 @@ export function resolveInstance(
   let matches: InstanceRecord[] = []
   for (const instance of instances) {
     for (const root of instance.roots) {
-      const normalizedRoot = normalizePath(root)
+      const normalizedRoot = normalizeRoutingPath(root)
       if (!isPathInside(path, normalizedRoot))
         continue
 
@@ -53,7 +53,7 @@ export function resolveInstance(
     )
   }
 
-  throw new InstanceResolutionError('instance_not_found', `No VS Code instance covers: ${uri}`)
+  throw new InstanceResolutionError('no_matching_instance', `No VS Code instance covers: ${uri}`)
 }
 
 function isPathInside(path: string, root: string): boolean {
@@ -68,7 +68,7 @@ function resolveUnique(instances: InstanceRecord[]): InstanceRecord {
   if (instances.length === 1)
     return instances[0]
   if (instances.length === 0)
-    throw new InstanceResolutionError('instance_not_found', 'No active VS Code instances')
+    throw new InstanceResolutionError('no_active_instances', 'No active VS Code instances')
 
   throw new InstanceResolutionError(
     'ambiguous_instance',
@@ -80,10 +80,10 @@ function resolveUnique(instances: InstanceRecord[]): InstanceRecord {
 function inputPath(uri: string): string | undefined {
   try {
     if (/^file:\/\//i.test(uri))
-      return normalizePath(fileURLToPath(uri))
+      return normalizeRoutingPath(fileURLToPath(uri))
     if (/^[a-z][a-z\d+.-]*:/i.test(uri))
       return undefined
-    return normalizePath(uri)
+    return normalizeRoutingPath(uri)
   }
   catch {
     return undefined
@@ -93,7 +93,11 @@ function inputPath(uri: string): string | undefined {
 /** 实例发现与路由失败的稳定协议错误 */
 export class InstanceResolutionError extends Error {
   constructor(
-    public readonly code: 'instance_not_found' | 'ambiguous_instance',
+    public readonly code:
+      | 'instance_not_found'
+      | 'no_matching_instance'
+      | 'no_active_instances'
+      | 'ambiguous_instance',
     message: string,
     public readonly candidates: string[] = [],
   ) {
