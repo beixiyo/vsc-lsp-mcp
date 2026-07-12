@@ -33,6 +33,7 @@ VSCode LSP MCP is a Visual Studio Code extension that exposes Language Server Pr
 
 This allows AI assistants and external tools to utilize VSCode's powerful language intelligence capabilities without direct integration.
 
+> [!TIP]
 > **Using Neovim?** See [vv-mcp.nvim](https://github.com/beixiyo/vv-mcp.nvim), the sibling implementation that exposes Neovim LSP clients and live editor context through MCP.
 
 ![vscode-ext](./docAssets/vsc-ext.webp)
